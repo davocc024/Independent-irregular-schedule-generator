@@ -90,6 +90,7 @@
   .level-label::after { content:'▾'; margin-left:auto; transition:.2s; }
   .level-label.collapsed::after { content:'▸'; }
   .level-body { display:flex; flex-direction:column; gap:6px; padding-top:6px; }
+  .level-body.hidden { display:none; } /* LÍNEA RECUPERADA PARA OCULTAR MATERIAS */
   
   .subj-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:var(--radius); background:var(--surface2); border:1px solid transparent; cursor:pointer; transition:.2s; position:relative; }
   .subj-item:hover { border-color:var(--border); transform: translateX(2px); }
@@ -687,10 +688,10 @@ function renderSidebar() {
     grp.style.animationDelay = `${delay}s`; delay += 0.05;
     
     const lbl = document.createElement('div'); lbl.className = 'level-label'; lbl.textContent = level;
-    lbl.onclick = () => { body.classList.toggle('hidden'); lbl.classList.toggle('collapsed'); };
+    lbl.onclick = () => { bodyDiv.classList.toggle('hidden'); lbl.classList.toggle('collapsed'); };
     grp.appendChild(lbl);
     
-    const body = document.createElement('div'); body.className = 'level-body';
+    const bodyDiv = document.createElement('div'); bodyDiv.className = 'level-body';
     list.forEach(s => {
       const isSelected = selected.has(s.id);
       const item = document.createElement('div'); item.className = 'subj-item' + (isSelected ? ' selected' : '');
@@ -702,9 +703,9 @@ function renderSidebar() {
         <div class="subj-info"><div class="subj-name">${mandatoryPin}${s.name}</div><div class="subj-meta">Paralelo: ${s.course}</div></div>
         <div class="subj-check">${isSelected ? '✓' : ''}</div>
       `;
-      body.appendChild(item);
+      bodyDiv.appendChild(item);
     });
-    grp.appendChild(body); container.appendChild(grp);
+    grp.appendChild(bodyDiv); container.appendChild(grp);
   });
   filterSidebar(); 
 }
