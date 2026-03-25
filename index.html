@@ -90,7 +90,7 @@
   .level-label::after { content:'▾'; margin-left:auto; transition:.2s; }
   .level-label.collapsed::after { content:'▸'; }
   .level-body { display:flex; flex-direction:column; gap:6px; padding-top:6px; }
-  .level-body.hidden { display:none; } /* LÍNEA RECUPERADA PARA OCULTAR MATERIAS */
+  .level-body.hidden { display:none; }
   
   .subj-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:var(--radius); background:var(--surface2); border:1px solid transparent; cursor:pointer; transition:.2s; position:relative; }
   .subj-item:hover { border-color:var(--border); transform: translateX(2px); }
@@ -572,9 +572,24 @@ function importData(event) {
     try {
       const imported = JSON.parse(e.target.result);
       if (Array.isArray(imported)) {
-        subjects = imported; selected.clear(); saveData(); 
+        // Lógica de "Appender" / Fusionar
+        let maxId = subjects.length > 0 ? Math.max(...subjects.map(s => s.id)) : 0;
+        let agregadas = 0;
+
+        imported.forEach(impSubj => {
+           // Evitar duplicados exactos (mismo nombre y mismo curso/paralelo)
+           const isDuplicate = subjects.some(s => s.name.trim().toLowerCase() === impSubj.name.trim().toLowerCase() && s.course === impSubj.course);
+           if(!isDuplicate) {
+               maxId++;
+               impSubj.id = maxId; // Asignar nuevo ID
+               subjects.push(impSubj);
+               agregadas++;
+           }
+        });
+
+        saveData(); 
         renderManage(); renderSidebar(); renderGrid(); updateDatalist(); updateQuickParaleloSelect();
-        showToast("✅ Base de datos restaurada");
+        showToast(`✅ Importación exitosa: Se agregaron ${agregadas} materias nuevas.`);
       } else { throw new Error("Formato inválido"); }
     } catch(err) { alert("❌ Error al leer el archivo .json."); }
   };
