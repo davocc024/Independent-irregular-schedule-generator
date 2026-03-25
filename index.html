@@ -57,8 +57,8 @@
   .pin-input.error { border-bottom-color: var(--danger); color: var(--danger); }
   .login-error { color: var(--danger); font-size: 0.75rem; opacity: 0; transition: 0.2s; height: 15px; }
   .login-error.show { opacity: 1; }
-  /* Leyenda esquina inferior derecha en Login */
   .login-footer { position: absolute; bottom: 20px; right: 20px; text-align: right; font-size: .75rem; color: var(--muted2); font-weight: 500; }
+  #btnForceLogin { cursor: default; }
 
   /* ── HEADER & TABS ── */
   header { background:var(--surface); border-bottom:1px solid var(--border); padding:0 24px; display:flex; align-items:center; gap:16px; height:60px; position:sticky; top:0; z-index:100; flex-wrap: wrap; }
@@ -79,8 +79,8 @@
   .sidebar-header { padding:16px; border-bottom:1px solid var(--border); font-family:'Syne',sans-serif; font-size:.85rem; font-weight:700; letter-spacing:.5px; color:var(--muted); text-transform:uppercase; display: flex; justify-content: space-between; align-items: center;}
   .close-sidebar-btn { display: none; background: transparent; border: none; color: var(--muted); font-size: 1.2rem; cursor: pointer; }
   .sidebar-search { padding: 12px; border-bottom: 1px solid var(--surface3); }
-  .sidebar-search input { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 6px; outline: none; font-size: 0.85rem; font-family: 'DM Sans', sans-serif;}
-  .sidebar-search input:focus { border-color: var(--accent); }
+  .sidebar-search input, .quick-select { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 6px; outline: none; font-size: 0.85rem; font-family: 'DM Sans', sans-serif;}
+  .sidebar-search input:focus, .quick-select:focus { border-color: var(--accent); }
   .sidebar-scroll { flex:1; overflow-y:auto; padding:12px; }
   .sidebar-scroll::-webkit-scrollbar { width:6px; }
   .sidebar-scroll::-webkit-scrollbar-thumb { background:var(--surface3); border-radius:4px; }
@@ -115,7 +115,6 @@
   .schedule-wrap { flex:1; padding:24px; display:flex; flex-direction:column;}
   .schedule-header-flex { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; flex-wrap: wrap; gap: 10px; }
   
-  /* Títulos de secciones en negrita */
   .schedule-title, .manage-title { font-family:'Syne',sans-serif; font-size:1.5rem; font-weight:800; margin-bottom:4px; color:var(--text); }
   .schedule-sub, .manage-sub { font-size:.85rem; color:var(--muted); }
   
@@ -169,7 +168,7 @@
   .manage-card:hover { border-color:var(--muted2); transform:translateY(-4px); box-shadow:0 8px 15px rgba(0,0,0,.15); }
   .card-top { display:flex; align-items:center; gap:10px; }
   .card-dot { width:14px; height:14px; border-radius:4px; flex-shrink:0; }
-  .card-name { font-family:'Syne',sans-serif; font-size:.9rem; font-weight:700; flex:1; color:var(--text); }
+  .card-name { font-family:'Syne',sans-serif; font-size:.9rem; font-weight:700; flex:1; color:var(--text); display:flex; align-items:center; gap:6px;}
   .card-level { font-size:.75rem; color:var(--muted); }
   .card-slots { display:flex; flex-direction:column; gap:4px; }
   .card-slot { font-size:.75rem; color:var(--muted); background:var(--bg); padding:4px 8px; border-radius:6px; border:1px solid var(--surface3); }
@@ -208,7 +207,6 @@
   .stat strong { color:var(--accent); font-weight:700; font-size:.9rem;}
   .watermark-legend { font-size: .75rem; color: var(--muted2); font-weight: 500; }
   
-  /* Botón interactivo Gemini (Main UI) */
   #togglePinBtn { cursor: pointer; transition: 0.2s; color: var(--accent2); font-weight: 700; }
   #togglePinBtn:hover { opacity: 0.8; text-decoration: underline dashed rgba(120,120,120,0.4); }
   
@@ -317,6 +315,9 @@
     <div class="sidebar-scroll" id="sidebarList"></div>
     
     <div class="sidebar-footer">
+      <select id="quickParaleloSelect" onchange="loadFullParalelo(this.value)" class="quick-select" style="margin-bottom:8px;">
+        <option value="">Revisar paralelo completo...</option>
+      </select>
       <button class="btn primary" onclick="openModal()">Agregar materia</button>
       <button class="btn" onclick="clearSelection()">Limpiar selección</button>
     </div>
@@ -420,6 +421,11 @@
       <input id="fNote" type="text" placeholder="Ej: Dra. Fukalova / D3-1">
     </div>
 
+    <div class="form-group" style="display:flex; align-items:center; gap:8px; margin-top: 10px; margin-bottom: 20px;">
+      <input type="checkbox" id="fMandatory" style="width:18px; height:18px; accent-color:var(--danger); cursor:pointer;">
+      <label for="fMandatory" style="margin:0; color:var(--danger); font-weight:700; font-size:0.8rem; cursor:pointer;">Materia Obligatoria (Repetición / Arrastre)</label>
+    </div>
+
     <div class="form-group">
       <label>Color</label>
       <div class="color-row" id="colorRow"></div>
@@ -441,16 +447,14 @@
 function showToast(message) {
   const container = document.getElementById('toastContainer');
   const toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.textContent = message;
+  toast.className = 'toast'; toast.textContent = message;
   container.appendChild(toast);
   setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
 // ── PWA: GENERADOR DE LOGO Y SERVICE WORKER DINÁMICO ──
 function initPWA() {
-  const canvas = document.createElement('canvas');
-  canvas.width = 512; canvas.height = 512;
+  const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512;
   const ctx = canvas.getContext('2d');
   ctx.fillStyle = '#1e1f20'; ctx.beginPath(); ctx.roundRect(0, 0, 512, 512, 80); ctx.fill();
   ctx.strokeStyle = '#e5c07b'; ctx.lineWidth = 24; ctx.lineCap = 'round';
@@ -462,11 +466,7 @@ function initPWA() {
   ctx.beginPath(); ctx.moveTo(180, 260); ctx.lineTo(260, 340); ctx.lineTo(380, 160); ctx.stroke();
   
   const iconBase64 = canvas.toDataURL('image/png');
-  const manifest = {
-      name: "Crea Horarios UCE", short_name: "Horarios", display: "standalone",
-      start_url: location.href, background_color: "#131314", theme_color: "#a8c7fa",
-      icons: [{ src: iconBase64, sizes: "512x512", type: "image/png" }]
-  };
+  const manifest = { name: "Crea Horarios UCE", short_name: "Horarios", display: "standalone", start_url: location.href, background_color: "#131314", theme_color: "#a8c7fa", icons: [{ src: iconBase64, sizes: "512x512", type: "image/png" }] };
   const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
   const linkManifest = document.createElement('link'); linkManifest.rel = 'manifest'; linkManifest.href = URL.createObjectURL(manifestBlob); document.head.appendChild(linkManifest);
   const linkApple = document.createElement('link'); linkApple.rel = 'apple-touch-icon'; linkApple.href = iconBase64; document.head.appendChild(linkApple);
@@ -544,16 +544,9 @@ function validatePIN() {
   }
 }
 
-// Botón fantasma inferior en Login Screen
-document.getElementById('btnForceLogin').addEventListener('click', () => {
-    validatePIN();
-});
+document.getElementById('btnForceLogin').addEventListener('click', () => { validatePIN(); });
+document.getElementById('btnDisclaimer').addEventListener('click', () => { alert("Uso exclusivamente estudiantil y sin fines de lucro. Se permite la copia y modificación, siempre que no medie comercialización"); });
 
-document.getElementById('btnDisclaimer').addEventListener('click', () => {
-    alert("Uso exclusivamente estudiantil y sin fines de lucro. Se permite la copia y modificación, siempre que no medie comercialización");
-});
-
-// Botón interactivo Gemini (Main Dashboard)
 document.getElementById('togglePinBtn').addEventListener('click', () => {
   isPinEnabled = !isPinEnabled;
   localStorage.setItem(PIN_KEY, isPinEnabled);
@@ -579,7 +572,7 @@ function importData(event) {
       const imported = JSON.parse(e.target.result);
       if (Array.isArray(imported)) {
         subjects = imported; selected.clear(); saveData(); 
-        renderManage(); renderSidebar(); renderGrid(); updateDatalist();
+        renderManage(); renderSidebar(); renderGrid(); updateDatalist(); updateQuickParaleloSelect();
         showToast("✅ Base de datos restaurada");
       } else { throw new Error("Formato inválido"); }
     } catch(err) { alert("❌ Error al leer el archivo .json."); }
@@ -620,12 +613,49 @@ function filterSidebar() {
       let hasVisible = false;
       const items = group.querySelectorAll('.subj-item');
       items.forEach(item => {
-          if(item.textContent.toLowerCase().includes(query)) {
-              item.style.display = 'flex'; hasVisible = true;
-          } else { item.style.display = 'none'; }
+          if(item.textContent.toLowerCase().includes(query)) { item.style.display = 'flex'; hasVisible = true; } 
+          else { item.style.display = 'none'; }
       });
       group.style.display = hasVisible ? 'block' : 'none';
   });
+}
+
+function updateQuickParaleloSelect() {
+  const select = document.getElementById('quickParaleloSelect');
+  const currentVal = select.value;
+  
+  const combos = [...new Set(subjects.map(s => JSON.stringify({level: s.level, course: s.course})))].map(JSON.parse);
+  combos.sort((a, b) => {
+    if(a.level === b.level) return a.course.localeCompare(b.course);
+    return a.level.localeCompare(b.level);
+  });
+
+  let html = '<option value="">Revisar paralelo completo...</option>';
+  combos.forEach(c => { 
+    const val = `${c.level}:::${c.course}`;
+    html += `<option value="${val}">${c.level} - ${c.course}</option>`; 
+  });
+  
+  select.innerHTML = html;
+  select.value = currentVal; 
+}
+
+function loadFullParalelo(val) {
+  if(!val) return;
+  const parts = val.split(':::');
+  if(parts.length !== 2) return;
+  const targetLevel = parts[0];
+  const targetCourse = parts[1];
+
+  selected.clear();
+  const toAdd = subjects.filter(s => s.level === targetLevel && s.course === targetCourse);
+  toAdd.forEach(s => selected.add(s.id)); 
+  
+  document.getElementById('conflictAlert').classList.remove('show');
+  saveData(); renderSidebar(); renderGrid();
+  showToast(`✅ ${targetLevel} ${targetCourse} cargado visualmente`);
+  
+  setTimeout(() => { document.getElementById('quickParaleloSelect').value = ''; }, 500);
 }
 
 function getOnboardingHTML() {
@@ -634,18 +664,9 @@ function getOnboardingHTML() {
       <h3>¡Bienvenido a Crea Horarios! 🎓</h3>
       <p>Parece que aún no tienes asignaturas registradas. Sigue estos pasos:</p>
       <div class="empty-steps">
-        <div class="empty-step">
-          <div class="empty-step-num">1</div>
-          <div class="empty-step-desc">Ve a <b>Gestionar Materias</b> y añade las asignaturas de tu semestre (P-1, P-2, etc).</div>
-        </div>
-        <div class="empty-step">
-          <div class="empty-step-num">2</div>
-          <div class="empty-step-desc">Abre el <b>Auto-Generador</b> para que el algoritmo cree las combinaciones perfectas.</div>
-        </div>
-        <div class="empty-step">
-          <div class="empty-step-num">3</div>
-          <div class="empty-step-desc">Aplica tu opción favorita y expórtala en la pestaña <b>Construir Horario</b>.</div>
-        </div>
+        <div class="empty-step"><div class="empty-step-num">1</div><div class="empty-step-desc">Ve a <b>Gestionar Materias</b> y añade las asignaturas de tu semestre.</div></div>
+        <div class="empty-step"><div class="empty-step-num">2</div><div class="empty-step-desc">Abre el <b>Auto-Generador</b> para que el algoritmo cree las combinaciones perfectas.</div></div>
+        <div class="empty-step"><div class="empty-step-num">3</div><div class="empty-step-desc">Aplica tu opción favorita y expórtala en la pestaña <b>Construir Horario</b>.</div></div>
       </div>
       <button class="btn primary" style="margin: 20px auto 0;" onclick="switchView('manage'); setTimeout(openModal, 100);">+ Crear mi primera materia</button>
     </div>
@@ -674,9 +695,11 @@ function renderSidebar() {
       const isSelected = selected.has(s.id);
       const item = document.createElement('div'); item.className = 'subj-item' + (isSelected ? ' selected' : '');
       item.onclick = () => toggleSubject(s.id);
+      
+      const mandatoryPin = s.isMandatory ? '<span title="Materia Obligatoria" style="color:var(--danger); font-size:0.75rem; margin-right:4px;">📌</span>' : '';
       item.innerHTML = `
         <div class="subj-color" style="background:${s.color}"></div>
-        <div class="subj-info"><div class="subj-name">${s.name}</div><div class="subj-meta">Paralelo: ${s.course}</div></div>
+        <div class="subj-info"><div class="subj-name">${mandatoryPin}${s.name}</div><div class="subj-meta">Paralelo: ${s.course}</div></div>
         <div class="subj-check">${isSelected ? '✓' : ''}</div>
       `;
       body.appendChild(item);
@@ -689,7 +712,6 @@ function renderSidebar() {
 function renderGrid() {
   const gridContainer = document.getElementById('scheduleGrid');
   const selectedSubjs = subjects.filter(s => selected.has(s.id));
-  
   gridContainer.innerHTML = '';
   
   let totalHours = 0; let totalGaps = 0;
@@ -743,7 +765,6 @@ function renderGrid() {
   });
   
   updateTimeLine();
-  
   document.getElementById('statCount').textContent = selectedSubjs.length;
   document.getElementById('statHours').textContent = totalHours;
   document.getElementById('statGaps').textContent = totalGaps;
@@ -751,8 +772,7 @@ function renderGrid() {
 
 function updateTimeLine() {
   document.querySelectorAll('.current-time-line').forEach(e => e.remove());
-  const now = new Date();
-  const day = now.getDay(); 
+  const now = new Date(); const day = now.getDay(); 
   if(day >= 1 && day <= 5) {
       const h = now.getHours(); const m = now.getMinutes();
       if(h >= 7 && h < 20) {
@@ -775,7 +795,16 @@ function renderManage() {
   
   container.innerHTML = subjects.map((s, index) => `
     <div class="manage-card animate-fade" style="animation-delay: ${index * 0.05}s">
-      <div class="card-top"><div class="card-dot" style="background:${s.color}"></div><div><div class="card-name">${s.name}</div><div class="card-level">${s.level} · ${s.course}</div></div></div>
+      <div class="card-top">
+        <div class="card-dot" style="background:${s.color}"></div>
+        <div>
+           <div class="card-name">${s.name}</div>
+           <div class="card-level">
+              ${s.isMandatory ? `<span style="background:var(--danger); color:#fff; font-size:0.55rem; padding:2px 6px; border-radius:4px; font-weight:800; margin-right:4px;">OBLIGATORIA</span>` : ''}
+              ${s.level} · ${s.course}
+           </div>
+        </div>
+      </div>
       ${s.note ? `<div style="font-size:0.7rem; color:var(--muted); font-style:italic;">📝 ${s.note}</div>` : ''}
       <div class="card-slots">${s.slots.map(sl => `<div class="card-slot">📅 ${sl.day} ${sl.start}:00–${sl.end}:00</div>`).join('')}</div>
       <div class="card-actions">
@@ -794,7 +823,7 @@ function duplicateSubject(id) {
    duplicate.id = getNextId();
    duplicate.course = original.course + " (Copia)";
    subjects.push(duplicate);
-   saveData(); renderManage(); renderSidebar(); updateDatalist();
+   saveData(); renderManage(); renderSidebar(); updateDatalist(); updateQuickParaleloSelect();
    showToast("📑 Materia duplicada exitosamente");
 }
 
@@ -802,15 +831,17 @@ function renderAutoSelection() {
   const uniqueNames = [...new Set(subjects.map(s => s.name.trim()))];
   const container = document.getElementById('autoSubjectFilter');
   if(uniqueNames.length === 0) {
-    container.innerHTML = '<p style="color:var(--muted); font-size:0.85rem; grid-column:1/-1;" class="animate-fade">Agrega materias primero para generar horarios.</p>';
-    return;
+    container.innerHTML = '<p style="color:var(--muted); font-size:0.85rem; grid-column:1/-1;" class="animate-fade">Agrega materias primero para generar horarios.</p>'; return;
   }
-  container.innerHTML = uniqueNames.map((name, index) => `
+  container.innerHTML = uniqueNames.map((name, index) => {
+    const isMandatory = subjects.some(s => s.name.trim() === name && s.isMandatory);
+    const pinHtml = isMandatory ? '<span style="color:var(--danger);" title="Obligatoria (Fija en el horario)">📌</span>' : '';
+    return `
     <label class="filter-lbl animate-fade" style="animation-delay: ${index * 0.03}s">
       <input type="checkbox" value="${name}" checked class="auto-filter-cb">
-      <span>${name}</span>
+      <span>${pinHtml} ${name}</span>
     </label>
-  `).join('');
+  `}).join('');
 }
 
 function slotsOverlap(slotsA, slotsB) {
@@ -825,13 +856,11 @@ function slotsOverlap(slotsA, slotsB) {
 function toggleSubject(id) {
   const alertBox = document.getElementById('conflictAlert');
   if(selected.has(id)) { 
-    selected.delete(id); 
-    alertBox.classList.remove('show'); 
+    selected.delete(id); alertBox.classList.remove('show'); 
   } else {
     const subjectToAdd = subjects.find(s => s.id === id);
     const currentSelected = subjects.filter(s => selected.has(s.id));
-    let conflictNames = [];
-    let duplicateName = false;
+    let conflictNames = []; let duplicateName = false;
 
     for(const sel of currentSelected) { 
       if(slotsOverlap(subjectToAdd.slots, sel.slots)) conflictNames.push(sel.name); 
@@ -839,16 +868,12 @@ function toggleSubject(id) {
     }
     
     if(duplicateName) {
-      alertBox.textContent = `⚠️ Acción bloqueada: Ya tienes seleccionada "${subjectToAdd.name}" en tu horario.`; 
-      alertBox.classList.add('show'); return;
+      alertBox.textContent = `⚠️ Acción bloqueada: Ya tienes seleccionada "${subjectToAdd.name}" en tu horario.`; alertBox.classList.add('show'); return;
     }
     if(conflictNames.length > 0) {
-      alertBox.textContent = `⚠️ Acción bloqueada: "${subjectToAdd.name}" choca con "${conflictNames.join(', ')}".`; 
-      alertBox.classList.add('show'); return; 
+      alertBox.textContent = `⚠️ Acción bloqueada: "${subjectToAdd.name}" choca con "${conflictNames.join(', ')}".`; alertBox.classList.add('show'); return; 
     } 
-    
-    selected.add(id); 
-    alertBox.classList.remove('show'); 
+    selected.add(id); alertBox.classList.remove('show'); 
   }
   saveData(); renderSidebar(); renderGrid();
 }
@@ -858,8 +883,7 @@ function clearSelection() { selected.clear(); document.getElementById('conflictA
 function exportSchedule() {
   if (selected.size === 0) { alert("¡El horario está vacío! Agrega materias antes de exportar."); return; }
   const container = document.getElementById('exportContainer'), btn = document.querySelector('#viewSchedule .btn');
-  btn.style.display = 'none';
-  document.querySelectorAll('.current-time-line').forEach(e => e.style.display = 'none'); 
+  btn.style.display = 'none'; document.querySelectorAll('.current-time-line').forEach(e => e.style.display = 'none'); 
   
   html2canvas(container, { backgroundColor: isLightMode ? '#f8f9fa' : '#131314', scale: 2 }).then(canvas => {
     btn.style.display = 'flex'; document.querySelectorAll('.current-time-line').forEach(e => e.style.display = 'block');
@@ -870,8 +894,7 @@ function exportSchedule() {
 
 // ── AUTO-GENERADOR ──
 function calculateGaps(combo) {
-  let gaps = 0;
-  const slotsByDay = { 'LUNES':[], 'MARTES':[], 'MIÉRCOLES':[], 'JUEVES':[], 'VIERNES':[] };
+  let gaps = 0; const slotsByDay = { 'LUNES':[], 'MARTES':[], 'MIÉRCOLES':[], 'JUEVES':[], 'VIERNES':[] };
   combo.forEach(s => s.slots.forEach(sl => slotsByDay[sl.day].push({ start: Number(sl.start), end: Number(sl.end) })));
   for (const day in slotsByDay) {
       const ds = slotsByDay[day].sort((a,b) => a.start - b.start);
@@ -889,6 +912,7 @@ function generateAutoSchedules() {
   
   const checkboxes = document.querySelectorAll('.auto-filter-cb:checked');
   const allowedSubjects = Array.from(checkboxes).map(cb => cb.value.toLowerCase());
+  const mandatoryNames = [];
 
   setTimeout(() => {
     const groups = {};
@@ -897,21 +921,28 @@ function generateAutoSchedules() {
       if(allowedSubjects.includes(bName)) {
         if(!groups[bName]) groups[bName] = [];
         groups[bName].push(s);
+        if(s.isMandatory && !mandatoryNames.includes(bName)) { mandatoryNames.push(bName); }
       }
     });
     
     const groupKeys = Object.keys(groups);
     let allValid = [];
-    let iterations = 0; const MAX_ITERATIONS = 50000; 
+    let iterations = 0; const MAX_ITERATIONS = 100000; 
 
     function backtrack(index, currentCombo) {
       if (iterations > MAX_ITERATIONS) return; 
       iterations++;
+      
       if(index === groupKeys.length) {
-        if(currentCombo.length >= 2) allValid.push([...currentCombo]); return;
+        if(currentCombo.length >= 1) allValid.push([...currentCombo]); return;
       }
-      backtrack(index + 1, currentCombo);
-      const parallels = groups[groupKeys[index]];
+      
+      const currentGroupName = groupKeys[index];
+      const isMandatoryGroup = mandatoryNames.includes(currentGroupName);
+
+      if (!isMandatoryGroup) { backtrack(index + 1, currentCombo); }
+
+      const parallels = groups[currentGroupName];
       for(let p of parallels) {
         let conflict = false;
         for(let c of currentCombo) { if(slotsOverlap(p.slots, c.slots)) { conflict = true; break; } }
@@ -937,10 +968,8 @@ function generateAutoSchedules() {
 }
 
 function applyAutoCombo(idsArray) {
-  selected = new Set(idsArray);
-  saveData(); renderSidebar(); renderGrid();
-  showToast("✅ Horario aplicado correctamente");
-  switchView('schedule');
+  selected = new Set(idsArray); saveData(); renderSidebar(); renderGrid();
+  showToast("✅ Horario aplicado correctamente"); switchView('schedule');
 }
 
 function renderAutoResults() {
@@ -951,7 +980,7 @@ function renderAutoResults() {
   if(generatedCombinations.length === 0) { resultsDiv.innerHTML = '<p style="color:var(--danger);" class="animate-fade">No se encontraron combinaciones viables.</p>'; return; }
 
   const limit = Math.min(generatedCombinations.length, 50);
-  let html = `<p style="color:var(--accent2); font-size:0.85rem; font-weight:600; margin-bottom:8px;" class="animate-fade">✅ Se generaron ${generatedCombinations.length} horarios compatibles (Ordenados por menor cantidad de huecos).</p>`;
+  let html = `<p style="color:var(--accent2); font-size:0.85rem; font-weight:600; margin-bottom:8px;" class="animate-fade">✅ Se generaron ${generatedCombinations.length} horarios compatibles.</p>`;
   
   for(let i = 0; i < limit; i++) {
     const combo = generatedCombinations[i];
@@ -959,7 +988,10 @@ function renderAutoResults() {
     const gaps = calculateGaps(combo);
     const idsJson = JSON.stringify(combo.map(s => s.id));
     
-    let subjectsHtml = combo.map(s => `<div class="auto-subject"><span class="auto-subject-name">${s.name}</span><span class="auto-subject-course">Paralelo: ${s.course}</span></div>`).join('');
+    let subjectsHtml = combo.map(s => {
+       const pinHtml = s.isMandatory ? '<span style="color:var(--danger); font-size:0.7rem; margin-right:4px;" title="Obligatoria">📌</span>' : '';
+       return `<div class="auto-subject"><span class="auto-subject-name">${pinHtml}${s.name}</span><span class="auto-subject-course">Paralelo: ${s.course}</span></div>`;
+    }).join('');
     
     html += `
       <div class="auto-card animate-fade" style="animation-delay: ${i * 0.05}s">
@@ -968,7 +1000,7 @@ function renderAutoResults() {
           <div class="auto-card-stats">${combo.length} Materias • ${totalHours} hrs clase • ${gaps} hrs huecas</div>
         </div>
         <div>${subjectsHtml}</div>
-        <button class="btn primary" style="width: 100%; margin-top: 12px; font-size:0.8rem; color: var(--accent-text);" onclick='applyAutoCombo(${idsJson})'>Aplicar este horario</button>
+        <button class="btn primary" style="width: 100%; margin-top: 12px; font-size:0.8rem;" onclick='applyAutoCombo(${idsJson})'>Aplicar este horario</button>
       </div>`;
   }
   if(generatedCombinations.length > 50) html += `<div style="text-align:center; color:var(--muted); font-size:0.8rem; margin-top:10px;">Mostrando las 50 mejores opciones.</div>`;
@@ -1067,11 +1099,13 @@ function openModal(id) {
     document.getElementById('fLevel').value = s.level;
     document.getElementById('fCourse').value = s.course.replace('P-', '').replace('(Copia)', '').trim();
     document.getElementById('fNote').value = s.note || '';
+    document.getElementById('fMandatory').checked = s.isMandatory || false;
     chosenColor = s.color; slots = s.slots.map(sl => ({...sl}));
   } else {
     document.getElementById('modalTitle').textContent = 'Nueva Materia';
     document.getElementById('fName').value = ''; document.getElementById('fLevel').value = ''; 
     document.getElementById('fCourse').value = ''; document.getElementById('fNote').value = '';
+    document.getElementById('fMandatory').checked = false;
     slots = [{day:'LUNES', start:7, end:8}];
   }
   renderColorRow(); renderSlots(); document.getElementById('overlay').classList.add('show');
@@ -1091,8 +1125,12 @@ function renderSlots() {
 }
 function addSlot() {
   const list = document.getElementById('slotList');
+  const lastRow = list.lastElementChild;
+  let defaultDay = 'LUNES';
+  if (lastRow) { const sel = lastRow.querySelector('.s-day'); if (sel) defaultDay = sel.value; }
+
   const div = document.createElement('div'); div.className = 'slot-row animate-fade';
-  div.innerHTML = `<select class="s-day">${DAYS.map(d=>`<option>${d}</option>`).join('')}</select><input type="number" min="7" max="19" class="s-start" value="7" placeholder="Inicio"><input type="number" min="8" max="20" class="s-end" value="8" placeholder="Fin"><button class="rm-btn" onclick="this.closest('.slot-row').remove()">✕</button>`;
+  div.innerHTML = `<select class="s-day">${DAYS.map(d=>`<option ${d===defaultDay?'selected':''}>${d}</option>`).join('')}</select><input type="number" min="7" max="19" class="s-start" value="7" placeholder="Inicio"><input type="number" min="8" max="20" class="s-end" value="8" placeholder="Fin"><button class="rm-btn" onclick="this.closest('.slot-row').remove()">✕</button>`;
   list.appendChild(div);
 }
 
@@ -1100,44 +1138,57 @@ function saveSubject() {
   const name = document.getElementById('fName').value.trim();
   if(!name) { alert('Ingresa el nombre de la materia'); return; }
   
+  const courseInput = document.getElementById('fCourse').value.trim() || '1';
+  const formattedCourse = 'P-' + courseInput;
+  
+  const isDuplicate = subjects.some(s => s.id !== editingId && s.name.trim().toLowerCase() === name.toLowerCase() && s.course === formattedCourse);
+  if(isDuplicate) {
+      alert(`⚠️ Ya existe "${name}" en el paralelo ${formattedCourse}.\nSi deseas cambiar sus horas, edita la materia existente en la pestaña "Gestionar Materias".`);
+      return;
+  }
+
   const currentSlots = [];
   const slotRows = document.querySelectorAll('.slot-row');
+  let invalidTime = false;
   let internalConflict = false;
   
   slotRows.forEach(row => {
     const d = row.querySelector('.s-day').value;
-    const st = Number(row.querySelector('.s-start').value);
-    const en = Number(row.querySelector('.s-end').value);
-    if(st < en) {
-      currentSlots.forEach(existing => { if(existing.day === d && st < existing.end && en > existing.start) internalConflict = true; });
-      currentSlots.push({day: d, start: st, end: en});
+    const st = parseInt(row.querySelector('.s-start').value, 10);
+    const en = parseInt(row.querySelector('.s-end').value, 10);
+    
+    if(isNaN(st) || isNaN(en) || st < 7 || en > 20 || st >= en) {
+        invalidTime = true;
+    } else {
+        currentSlots.forEach(existing => { if(existing.day === d && st < existing.end && en > existing.start) internalConflict = true; });
+        currentSlots.push({day: d, start: st, end: en});
     }
   });
 
-  if(internalConflict) { alert('Hay bloques de horas que se cruzan entre sí en esta misma materia. Corrige las horas.'); return; }
+  if(invalidTime) { alert('⚠️ Hay horas inválidas. Asegúrate de usar formato 24h (7 a 20), sin decimales, y que la hora de inicio sea menor a la de fin.'); return; }
+  if(internalConflict) { alert('⚠️ Hay bloques de horas que se cruzan entre sí en esta misma materia. Corrige las horas.'); return; }
   if(currentSlots.length === 0) { alert('Agrega al menos un bloque horario válido'); return; }
 
-  const courseInput = document.getElementById('fCourse').value.trim() || '1';
-  const formattedCourse = 'P-' + courseInput;
   const noteVal = document.getElementById('fNote').value.trim();
+  const isMandatory = document.getElementById('fMandatory').checked;
 
   const s = {
     id: editingId || getNextId(), name,
     level: document.getElementById('fLevel').value || 'Sin Nivel',
-    course: formattedCourse, color: chosenColor, slots: currentSlots, note: noteVal
+    course: formattedCourse, color: chosenColor, slots: currentSlots, note: noteVal, isMandatory: isMandatory
   };
 
   if(editingId) { const idx = subjects.findIndex(x=>x.id===editingId); subjects[idx] = s; selected.delete(editingId); } 
   else { subjects.push(s); }
   
-  saveData(); closeModal(); renderSidebar(); renderGrid(); renderManage(); renderAutoSelection(); updateDatalist();
+  saveData(); closeModal(); renderSidebar(); renderGrid(); renderManage(); renderAutoSelection(); updateDatalist(); updateQuickParaleloSelect();
   showToast("✅ Materia guardada con éxito");
 }
 
 function deleteSubject(id) {
   if(!confirm('¿Eliminar esta materia?')) return;
   subjects = subjects.filter(s=>s.id!==id); selected.delete(id);
-  saveData(); renderSidebar(); renderGrid(); renderManage(); renderAutoSelection(); updateDatalist();
+  saveData(); renderSidebar(); renderGrid(); renderManage(); renderAutoSelection(); updateDatalist(); updateQuickParaleloSelect();
   showToast("🗑️ Materia eliminada");
 }
 function editSubject(id) { openModal(id); }
@@ -1174,7 +1225,7 @@ window.addEventListener('resize', () => {
 document.getElementById('overlay').addEventListener('click', e => { if(e.target === document.getElementById('overlay')) closeModal(); });
 
 // Inicialización
-loadData(); renderSidebar(); renderGrid(); updateDatalist();
+loadData(); renderSidebar(); renderGrid(); updateDatalist(); updateQuickParaleloSelect();
 
 if(window.innerWidth <= 768 && document.getElementById('viewManage').style.display !== 'flex') document.getElementById('mobileMenuBtn').style.display = 'block';
 </script>
