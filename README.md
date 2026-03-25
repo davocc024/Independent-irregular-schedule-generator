@@ -1,0 +1,1 @@
+Deactivating word "Gemini"
