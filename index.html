@@ -162,23 +162,16 @@
   .auto-subject-name { color: var(--text); font-weight: 500; }
   .auto-subject-course { color: var(--accent2); font-weight: 600;}
 
-  /* ── MANAGE VIEW & MODAL ── */
+  /* ── MANAGE VIEW (REDISEÑADO) & MODAL ── */
   .manage-wrap { padding:24px; flex:1; overflow:auto; }
-  .manage-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px; }
-  .manage-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; display:flex; flex-direction:column; gap:10px; transition:all .3s ease; box-shadow:0 4px 6px rgba(0,0,0,.1); }
-  .manage-card:hover { border-color:var(--muted2); transform:translateY(-4px); box-shadow:0 8px 15px rgba(0,0,0,.15); }
-  .card-top { display:flex; align-items:center; gap:10px; }
-  .card-dot { width:14px; height:14px; border-radius:4px; flex-shrink:0; }
-  .card-name { font-family:'Syne',sans-serif; font-size:.9rem; font-weight:700; flex:1; color:var(--text); display:flex; align-items:center; gap:6px;}
-  .card-level { font-size:.75rem; color:var(--muted); }
-  .card-slots { display:flex; flex-direction:column; gap:4px; }
-  .card-slot { font-size:.75rem; color:var(--muted); background:var(--bg); padding:4px 8px; border-radius:6px; border:1px solid var(--surface3); }
-  .card-actions { display:flex; gap:8px; margin-top:6px; }
-  .card-btn { flex:1; background:var(--surface2); border:1px solid transparent; color:var(--text); font-size:.75rem; padding:6px; border-radius:6px; cursor:pointer; transition:.2s;}
-  .card-btn:hover { background:var(--surface3); border-color:var(--border); }
-  .card-btn.del { color:var(--danger); }
-  .card-btn.del:hover { background:var(--danger-bg); border-color:rgba(217, 48, 37, 0.3); }
+  .manage-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; }
+  .manage-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; display:flex; flex-direction:column; transition:all .3s ease; box-shadow:0 4px 6px rgba(0,0,0,.1); }
+  .manage-card:hover { border-color:var(--muted2); box-shadow:0 8px 15px rgba(0,0,0,.15); }
   
+  /* Botones de paralelo blindados y más visibles */
+  .parallel-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 700; transition: all 0.2s ease; outline: none; }
+  .parallel-btn:hover { background: var(--surface3); border-color: var(--accent); color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+
   .overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:200; display:none; align-items:center; justify-content:center; backdrop-filter: blur(3px); }
   .overlay.show { display:flex; }
   .modal { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:28px; width:95%; max-width: 520px; max-height:90vh; overflow-y:auto; box-shadow: 0 10px 40px rgba(0,0,0,0.4);}
@@ -189,7 +182,7 @@
   
   .input-group { display: flex; align-items: center; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; transition: .2s; overflow: hidden;}
   .input-group:focus-within { border-color: var(--accent); }
-  .input-group span { padding-left: 12px; color: var(--muted2); font-weight: 600; font-size: .9rem; }
+  .input-group span { padding-left: 12px; color: var(--muted2); font-weight: 600; font-size: .9rem; white-space: nowrap;}
   .input-group input { flex: 1; border: none; background: transparent; color: var(--text); padding: 10px; outline: none; font-family: 'DM Sans', sans-serif; font-size: .9rem; }
 
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -205,6 +198,7 @@
 
   .stats-bar { padding:14px 24px; border-top:1px solid var(--border); display:flex; gap:24px; background:var(--surface); flex-shrink:0; align-items:center; justify-content: space-between; flex-wrap: wrap;}
   .stat { font-size:.8rem; color:var(--muted); }
+  .stat-counter-wrap { cursor:help; display:inline-block; padding-bottom:2px; border-bottom:1px dotted var(--muted); }
   .stat strong { color:var(--accent); font-weight:700; font-size:.9rem;}
   .watermark-legend { font-size: .75rem; color: var(--muted2); font-weight: 500; }
   
@@ -309,7 +303,7 @@
         <button class="close-sidebar-btn" onclick="toggleMobileSidebar()">✕</button>
       </div>
       <div class="sidebar-search" style="padding:0; border:none;">
-        <input type="text" id="searchInput" placeholder="🔍 Buscar asignatura..." onkeyup="filterSidebar()">
+        <input type="search" id="searchInput" placeholder="🔍 Buscar asignatura..." oninput="filterSidebar()">
       </div>
     </div>
     
@@ -319,7 +313,7 @@
       <select id="quickParaleloSelect" onchange="loadFullParalelo(this.value)" class="quick-select" style="margin-bottom:8px;">
         <option value="">Revisar paralelo completo...</option>
       </select>
-      <button class="btn primary" onclick="openModal()">Agregar materia</button>
+      <button class="btn primary" onclick="openModal(null)">Agregar materia</button>
       <button class="btn" onclick="clearSelection()">Limpiar selección</button>
     </div>
   </div>
@@ -328,7 +322,7 @@
     <div class="schedule-wrap animate-fade" id="exportContainer">
       <div class="schedule-header-flex">
         <div>
-          <div class="schedule-title">Horario Académico</div>
+          <div class="schedule-title">Horario Académico <span id="currentOptionLabel" style="font-size:0.9rem; color:var(--accent); font-weight:700; margin-left:12px;"></span></div>
           <div class="schedule-sub">Selecciona asignaturas o usa la opción Imprimir (Ctrl+P).</div>
         </div>
         <button class="btn" onclick="exportSchedule()">Exportar Imagen</button>
@@ -342,7 +336,7 @@
     
     <div class="stats-bar" id="statsBar">
       <div>
-        <span class="stat">Materias: <strong id="statCount">0</strong></span>
+        <span class="stat">Materias: <span class="stat-counter-wrap" id="counterTooltip"><strong id="statCount">0</strong></span></span>
         <span class="stat" style="margin-left: 15px;">Horas/semana: <strong id="statHours">0</strong></span>
         <span class="stat" style="margin-left: 15px;">Horas huecas: <strong id="statGaps">0</strong></span>
       </div>
@@ -380,13 +374,14 @@
       <div class="schedule-header-flex">
         <div>
           <div class="manage-title">Gestión de Materias</div>
-          <div class="manage-sub">Administra la base de datos y exporta/importa copias de seguridad.</div>
+          <div class="manage-sub">Administra tu base de datos organizada por asignaturas.</div>
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
           <button class="btn" onclick="document.getElementById('importFile').click()">📥 Importar</button>
           <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
           <button class="btn" onclick="exportData()">📤 Exportar</button>
-          <button class="btn primary" onclick="openModal()">Agregar materia</button>
+          <button class="btn" onclick="deleteAllSubjects()" style="color:var(--danger); border-color:rgba(242, 139, 130, 0.4);">🗑️ Borrar Todas</button>
+          <button class="btn primary" onclick="openModal(null)">Agregar materia</button>
         </div>
       </div>
       <div class="manage-grid" id="manageGrid"></div>
@@ -396,7 +391,11 @@
 
 <div class="overlay" id="overlay">
   <div class="modal">
-    <h2 id="modalTitle">Nueva Materia</h2>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2 id="modalTitle" style="margin: 0;">Nueva Materia</h2>
+      <button id="btnModalDelete" class="btn" style="color:var(--danger); border-color:rgba(242, 139, 130, 0.4); display:none; padding: 6px 12px; font-size: 0.8rem;" onclick="deleteSubjectFromModal()">🗑️ Borrar</button>
+    </div>
+    
     <div class="form-group">
       <label>Nombre de la materia</label>
       <input id="fName" type="text" placeholder="Ej: Fisicoquímica" list="subjectNamesDatalist" autocomplete="off" autofocus>
@@ -406,7 +405,10 @@
     <div class="form-row">
       <div class="form-group">
         <label>Nivel / Semestre</label>
-        <input id="fLevel" type="text" placeholder="Ej: Semestre 5">
+        <div class="input-group">
+          <span>Semestre </span>
+          <input id="fLevel" type="number" min="1" placeholder="#">
+        </div>
       </div>
       <div class="form-group">
         <label>Paralelo / Curso</label>
@@ -481,7 +483,7 @@ function initPWA() {
 }
 initPWA();
 
-// ── CONFIGURACION TEMA (DARK/LIGHT) ──
+// ── CONFIGURACION TEMA Y PALETA ──
 const THEME_KEY = 'horario_theme';
 let isLightMode = localStorage.getItem(THEME_KEY) === 'light';
 function updateThemeIcon() { document.getElementById('themeIcon').textContent = isLightMode ? '🌙' : '☀️'; }
@@ -494,7 +496,6 @@ function toggleTheme() {
   updateThemeIcon();
 }
 
-// ── LOCAL STORAGE SETUP & DB ──
 const DB_KEY = 'horario_materias_db';
 const SEL_KEY = 'horario_materias_seleccionadas';
 const PIN_KEY = 'horario_pin_enabled';
@@ -502,13 +503,15 @@ const PIN_KEY = 'horario_pin_enabled';
 const DAYS = ['LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES'];
 const HOURS_START = 7, HOURS_END = 20;
 const HOURS = Array.from({length: HOURS_END - HOURS_START}, (_,i) => HOURS_START + i);
-const COLORS = ['#a8c7fa','#e5c07b','#81c995','#fde293','#f28b82','#78d9ec','#fcaded','#a8dab5','#fcb97d','#8ab4f8'];
+/* 3 NUEVOS COLORES AÑADIDOS A LA PALETA */
+const COLORS = ['#a8c7fa','#e5c07b','#81c995','#fde293','#f28b82','#78d9ec','#fcaded','#a8dab5','#fcb97d','#8ab4f8', '#b39ddb', '#ffcc80', '#80cbc4'];
 
 let subjects = [];
 let selected = new Set();
 let editingId = null;
 let chosenColor = COLORS[0];
 let generatedCombinations = [];
+let unselectedAutoFilters = new Set(); 
 
 // ── LÓGICA DE LOGIN (OFUSCADO) ──
 const TARGET_HASH = "MzY1Mg=="; // 3652
@@ -555,7 +558,7 @@ document.getElementById('togglePinBtn').addEventListener('click', () => {
   else { showToast("🔓 Bloqueo por PIN Desactivado."); }
 });
 
-// ── IMPORTAR/EXPORTAR JSON ──
+// ── IMPORTAR / EXPORTAR / BORRAR TODO ──
 function exportData() {
   if (subjects.length === 0) { alert("No hay materias para exportar."); return; }
   const dataStr = JSON.stringify(subjects, null, 2);
@@ -572,29 +575,30 @@ function importData(event) {
     try {
       const imported = JSON.parse(e.target.result);
       if (Array.isArray(imported)) {
-        // Lógica de "Appender" / Fusionar
         let maxId = subjects.length > 0 ? Math.max(...subjects.map(s => s.id)) : 0;
         let agregadas = 0;
-
         imported.forEach(impSubj => {
-           // Evitar duplicados exactos (mismo nombre y mismo curso/paralelo)
-           const isDuplicate = subjects.some(s => s.name.trim().toLowerCase() === impSubj.name.trim().toLowerCase() && s.course === impSubj.course);
+           const isDuplicate = subjects.some(s => String(s.name || '').trim().toLowerCase() === String(impSubj.name || '').trim().toLowerCase() && String(s.course || '') === String(impSubj.course || ''));
            if(!isDuplicate) {
-               maxId++;
-               impSubj.id = maxId; // Asignar nuevo ID
-               subjects.push(impSubj);
-               agregadas++;
+               maxId++; impSubj.id = maxId; subjects.push(impSubj); agregadas++;
            }
         });
-
-        saveData(); 
-        renderManage(); renderSidebar(); renderGrid(); updateDatalist(); updateQuickParaleloSelect();
-        showToast(`✅ Importación exitosa: Se agregaron ${agregadas} materias nuevas.`);
+        saveData(); renderManage(); renderSidebar(); renderGrid(); updateDatalist(); updateQuickParaleloSelect();
+        showToast(`✅ Importación exitosa: Se agregaron ${agregadas} materias.`);
       } else { throw new Error("Formato inválido"); }
     } catch(err) { alert("❌ Error al leer el archivo .json."); }
   };
   reader.readAsText(file);
   event.target.value = '';
+}
+
+function deleteAllSubjects() {
+  if(subjects.length === 0) return;
+  if(confirm("⚠️ ¿Estás seguro de que quieres borrar TODAS las materias?\n\nTe sugerimos usar el botón de 'Exportar' primero para guardar una copia de seguridad.\n¿Deseas continuar y vaciar la base de datos?")) {
+      subjects = []; selected.clear(); saveData();
+      renderManage(); renderSidebar(); renderGrid(); renderAutoSelection(); updateDatalist(); updateQuickParaleloSelect();
+      showToast("🗑️ Base de datos eliminada. Lista para importar.");
+  }
 }
 
 // ── FUNCIONES DE TABLERO Y DATOS ──
@@ -605,8 +609,8 @@ function loadData() {
   const storedSel = localStorage.getItem(SEL_KEY);
   if(storedSel) {
     selected = new Set(JSON.parse(storedSel));
-    const validIds = new Set(subjects.map(s => s.id));
-    selected.forEach(id => { if(!validIds.has(id)) selected.delete(id); });
+    const validIds = new Set(subjects.map(s => String(s.id)));
+    selected.forEach(id => { if(!validIds.has(String(id))) selected.delete(id); });
   }
 }
 
@@ -618,18 +622,18 @@ function saveData() {
 function getNextId() { return subjects.length === 0 ? 1 : Math.max(...subjects.map(s => s.id)) + 1; }
 
 function updateDatalist() {
-  const uniqueNames = [...new Set(subjects.map(s => s.name.trim()))];
+  const uniqueNames = [...new Set(subjects.map(s => String(s.name || '').trim()))];
   document.getElementById('subjectNamesDatalist').innerHTML = uniqueNames.map(name => `<option value="${name}">`).join('');
 }
 
 function filterSidebar() {
-  const query = document.getElementById('searchInput').value.toLowerCase();
+  const query = String(document.getElementById('searchInput').value || '').toLowerCase();
   const groups = document.querySelectorAll('#sidebarList .level-group');
   groups.forEach(group => {
       let hasVisible = false;
       const items = group.querySelectorAll('.subj-item');
       items.forEach(item => {
-          if(item.textContent.toLowerCase().includes(query)) { item.style.display = 'flex'; hasVisible = true; } 
+          if(String(item.textContent || '').toLowerCase().includes(query)) { item.style.display = 'flex'; hasVisible = true; } 
           else { item.style.display = 'none'; }
       });
       group.style.display = hasVisible ? 'block' : 'none';
@@ -640,7 +644,7 @@ function updateQuickParaleloSelect() {
   const select = document.getElementById('quickParaleloSelect');
   const currentVal = select.value;
   
-  const combos = [...new Set(subjects.map(s => JSON.stringify({level: s.level, course: s.course})))].map(JSON.parse);
+  const combos = [...new Set(subjects.map(s => JSON.stringify({level: String(s.level || ''), course: String(s.course || '')})))].map(JSON.parse);
   combos.sort((a, b) => {
     if(a.level === b.level) return a.course.localeCompare(b.course);
     return a.level.localeCompare(b.level);
@@ -653,7 +657,7 @@ function updateQuickParaleloSelect() {
   });
   
   select.innerHTML = html;
-  select.value = currentVal; 
+  if(combos.some(c => `${c.level}:::${c.course}` === currentVal)) { select.value = currentVal; }
 }
 
 function loadFullParalelo(val) {
@@ -664,14 +668,13 @@ function loadFullParalelo(val) {
   const targetCourse = parts[1];
 
   selected.clear();
-  const toAdd = subjects.filter(s => s.level === targetLevel && s.course === targetCourse);
-  toAdd.forEach(s => selected.add(s.id)); 
+  const toAdd = subjects.filter(s => String(s.level || '') === targetLevel && String(s.course || '') === targetCourse);
+  toAdd.forEach(s => selected.add(String(s.id))); 
   
   document.getElementById('conflictAlert').classList.remove('show');
+  document.getElementById('currentOptionLabel').textContent = ''; 
   saveData(); renderSidebar(); renderGrid();
   showToast(`✅ ${targetLevel} ${targetCourse} cargado visualmente`);
-  
-  setTimeout(() => { document.getElementById('quickParaleloSelect').value = ''; }, 500);
 }
 
 function getOnboardingHTML() {
@@ -684,7 +687,7 @@ function getOnboardingHTML() {
         <div class="empty-step"><div class="empty-step-num">2</div><div class="empty-step-desc">Abre el <b>Auto-Generador</b> para que el algoritmo cree las combinaciones perfectas.</div></div>
         <div class="empty-step"><div class="empty-step-num">3</div><div class="empty-step-desc">Aplica tu opción favorita y expórtala en la pestaña <b>Construir Horario</b>.</div></div>
       </div>
-      <button class="btn primary" style="margin: 20px auto 0;" onclick="switchView('manage'); setTimeout(openModal, 100);">+ Crear mi primera materia</button>
+      <button class="btn primary" style="margin: 20px auto 0;" onclick="switchView('manage'); setTimeout(() => openModal(null), 100);">+ Crear mi primera materia</button>
     </div>
   `;
 }
@@ -694,7 +697,11 @@ function renderSidebar() {
   if (subjects.length === 0) { container.innerHTML = `<div style="padding:20px; text-align:center; font-size:0.8rem; color:var(--muted);" class="animate-fade">Lista vacía.</div>`; return; }
 
   const grouped = {};
-  subjects.forEach(s => { if(!grouped[s.level]) grouped[s.level] = []; grouped[s.level].push(s); });
+  subjects.forEach(s => { 
+      const lvl = String(s.level || '');
+      if(!grouped[lvl]) grouped[lvl] = []; 
+      grouped[lvl].push(s); 
+  });
   container.innerHTML = '';
   
   let delay = 0;
@@ -708,14 +715,14 @@ function renderSidebar() {
     
     const bodyDiv = document.createElement('div'); bodyDiv.className = 'level-body';
     list.forEach(s => {
-      const isSelected = selected.has(s.id);
+      const isSelected = selected.has(String(s.id)) || selected.has(s.id);
       const item = document.createElement('div'); item.className = 'subj-item' + (isSelected ? ' selected' : '');
-      item.onclick = () => toggleSubject(s.id);
+      item.onclick = () => toggleSubject(String(s.id));
       
       const mandatoryPin = s.isMandatory ? '<span title="Materia Obligatoria" style="color:var(--danger); font-size:0.75rem; margin-right:4px;">📌</span>' : '';
       item.innerHTML = `
         <div class="subj-color" style="background:${s.color}"></div>
-        <div class="subj-info"><div class="subj-name">${mandatoryPin}${s.name}</div><div class="subj-meta">Paralelo: ${s.course}</div></div>
+        <div class="subj-info"><div class="subj-name">${mandatoryPin}${String(s.name || '')}</div><div class="subj-meta">Paralelo: ${String(s.course || '')}</div></div>
         <div class="subj-check">${isSelected ? '✓' : ''}</div>
       `;
       bodyDiv.appendChild(item);
@@ -727,13 +734,13 @@ function renderSidebar() {
 
 function renderGrid() {
   const gridContainer = document.getElementById('scheduleGrid');
-  const selectedSubjs = subjects.filter(s => selected.has(s.id));
+  const selectedSubjs = subjects.filter(s => selected.has(String(s.id)) || selected.has(s.id));
   gridContainer.innerHTML = '';
   
   let totalHours = 0; let totalGaps = 0;
   const slotsByDay = { 'LUNES':[], 'MARTES':[], 'MIÉRCOLES':[], 'JUEVES':[], 'VIERNES':[] };
   selectedSubjs.forEach(s => {
-    s.slots.forEach(sl => {
+    (s.slots || []).forEach(sl => {
       totalHours += (Number(sl.end) - Number(sl.start));
       slotsByDay[sl.day].push({ start: Number(sl.start), end: Number(sl.end) });
     });
@@ -769,21 +776,25 @@ function renderGrid() {
     HOURS.forEach((_,i) => dayCol.innerHTML += `<div class="day-stripe" style="top:${i*52}px;height:52px"></div>`);
     
     selectedSubjs.forEach(s => {
-      s.slots.filter(sl => sl.day === day).forEach(sl => {
+      (s.slots || []).filter(sl => sl.day === day).forEach(sl => {
         const top = (Number(sl.start) - HOURS_START) * 52 + 2;
         const height = ((Number(sl.end) - Number(sl.start)) * 52) - 4;
-        const noteHtml = s.note ? `<div class="block-note">${s.note}</div>` : '';
+        const noteHtml = s.note ? `<div class="block-note">${String(s.note || '')}</div>` : '';
         dayCol.innerHTML += `<div class="block animate-fade" style="top:${top}px;height:${height}px;background:${s.color};border-left:4px solid rgba(0,0,0,0.2);">
-            <div class="block-name">${s.name}</div><div class="block-detail">${s.course} | ${sl.start}:00–${sl.end}:00</div>${noteHtml}</div>`;
+            <div class="block-name">${String(s.name || '')}</div><div class="block-detail">${String(s.course || '')} | ${sl.start}:00–${sl.end}:00</div>${noteHtml}</div>`;
       });
     });
     col.appendChild(dayCol); gridContainer.appendChild(col);
   });
   
   updateTimeLine();
+  
   document.getElementById('statCount').textContent = selectedSubjs.length;
   document.getElementById('statHours').textContent = totalHours;
   document.getElementById('statGaps').textContent = totalGaps;
+  
+  const tooltipText = selectedSubjs.length > 0 ? selectedSubjs.map(s => `- ${String(s.name || '')} (${String(s.course || '')})`).join('\n') : 'Ninguna materia seleccionada';
+  document.getElementById('counterTooltip').title = tooltipText;
 }
 
 function updateTimeLine() {
@@ -805,59 +816,69 @@ function updateTimeLine() {
 }
 setInterval(updateTimeLine, 60000);
 
+// ── REDISEÑO GESTIÓN DE MATERIAS (Categorización Homogénea) ──
 function renderManage() {
   const container = document.getElementById('manageGrid');
   if(subjects.length === 0) { container.innerHTML = `<div style="grid-column:1/-1;">${getOnboardingHTML()}</div>`; return; }
   
-  container.innerHTML = subjects.map((s, index) => `
-    <div class="manage-card animate-fade" style="animation-delay: ${index * 0.05}s">
-      <div class="card-top">
-        <div class="card-dot" style="background:${s.color}"></div>
-        <div>
-           <div class="card-name">${s.name}</div>
-           <div class="card-level">
-              ${s.isMandatory ? `<span style="background:var(--danger); color:#fff; font-size:0.55rem; padding:2px 6px; border-radius:4px; font-weight:800; margin-right:4px;">OBLIGATORIA</span>` : ''}
-              ${s.level} · ${s.course}
-           </div>
-        </div>
-      </div>
-      ${s.note ? `<div style="font-size:0.7rem; color:var(--muted); font-style:italic;">📝 ${s.note}</div>` : ''}
-      <div class="card-slots">${s.slots.map(sl => `<div class="card-slot">📅 ${sl.day} ${sl.start}:00–${sl.end}:00</div>`).join('')}</div>
-      <div class="card-actions">
-        <button class="card-btn" onclick="editSubject(${s.id})">Editar</button>
-        <button class="card-btn" onclick="duplicateSubject(${s.id})">Duplicar</button>
-        <button class="card-btn del" onclick="deleteSubject(${s.id})">Borrar</button>
-      </div>
-    </div>
-  `).join('');
-}
+  const groupedByName = {};
+  subjects.forEach(s => {
+      const key = String(s.name || '').trim();
+      if(!groupedByName[key]) groupedByName[key] = [];
+      groupedByName[key].push(s);
+  });
 
-function duplicateSubject(id) {
-   const original = subjects.find(s => s.id === id);
-   if(!original) return;
-   const duplicate = JSON.parse(JSON.stringify(original));
-   duplicate.id = getNextId();
-   duplicate.course = original.course + " (Copia)";
-   subjects.push(duplicate);
-   saveData(); renderManage(); renderSidebar(); updateDatalist(); updateQuickParaleloSelect();
-   showToast("📑 Materia duplicada exitosamente");
+  let html = '';
+  Object.entries(groupedByName).sort((a,b) => a[0].localeCompare(b[0])).forEach(([name, list], idx) => {
+      const level = String(list[0].level || '');
+      const color = list[0].color || COLORS[0];
+      const hasMandatory = list.some(s => s.isMandatory);
+      
+      html += `
+      <div class="manage-card animate-fade" style="animation-delay: ${idx * 0.05}s; display:flex; flex-direction:column; gap:12px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+              <div class="card-dot" style="background:${color}; width:18px; height:18px; border-radius:6px;"></div>
+              <div style="flex:1;">
+                  <div class="card-name" style="font-size:1.05rem; font-weight:800;">${name}</div>
+                  <div class="card-level" style="margin-top:2px;">
+                      ${hasMandatory ? `<span style="background:var(--danger); color:#fff; font-size:0.6rem; padding:2px 6px; border-radius:4px; font-weight:800; margin-right:6px;">OBLIGATORIO</span>` : ''}
+                      ${level}
+                  </div>
+              </div>
+          </div>
+          <div style="font-size:0.75rem; color:var(--muted); font-weight:700; margin-top:4px;">PARALELOS DISPONIBLES:</div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              ${list.sort((a,b) => String(a.course||'').localeCompare(String(b.course||''))).map(s => `
+                  <button type="button" class="parallel-btn" onclick="editSubject('${s.id}')" title="Editar paralelo ${String(s.course||'')}">${String(s.course||'N/A')}</button>
+              `).join('')}
+          </div>
+      </div>`;
+  });
+  
+  container.innerHTML = html;
 }
 
 function renderAutoSelection() {
-  const uniqueNames = [...new Set(subjects.map(s => s.name.trim()))];
+  const uniqueNames = [...new Set(subjects.map(s => String(s.name || '').trim()))];
   const container = document.getElementById('autoSubjectFilter');
   if(uniqueNames.length === 0) {
     container.innerHTML = '<p style="color:var(--muted); font-size:0.85rem; grid-column:1/-1;" class="animate-fade">Agrega materias primero para generar horarios.</p>'; return;
   }
   container.innerHTML = uniqueNames.map((name, index) => {
-    const isMandatory = subjects.some(s => s.name.trim() === name && s.isMandatory);
+    const isMandatory = subjects.some(s => String(s.name || '').trim() === name && s.isMandatory);
     const pinHtml = isMandatory ? '<span style="color:var(--danger);" title="Obligatoria (Fija en el horario)">📌</span>' : '';
+    const isChecked = !unselectedAutoFilters.has(name);
     return `
     <label class="filter-lbl animate-fade" style="animation-delay: ${index * 0.03}s">
-      <input type="checkbox" value="${name}" checked class="auto-filter-cb">
+      <input type="checkbox" value="${name}" ${isChecked ? 'checked' : ''} class="auto-filter-cb" onchange="toggleAutoFilter('${name}', this.checked)">
       <span>${pinHtml} ${name}</span>
     </label>
   `}).join('');
+}
+
+function toggleAutoFilter(name, isChecked) {
+    if(isChecked) unselectedAutoFilters.delete(name);
+    else unselectedAutoFilters.add(name);
 }
 
 function slotsOverlap(slotsA, slotsB) {
@@ -870,31 +891,40 @@ function slotsOverlap(slotsA, slotsB) {
 }
 
 function toggleSubject(id) {
+  const targetId = String(id);
   const alertBox = document.getElementById('conflictAlert');
-  if(selected.has(id)) { 
-    selected.delete(id); alertBox.classList.remove('show'); 
+  if(selected.has(targetId)) { 
+    selected.delete(targetId); alertBox.classList.remove('show'); 
   } else {
-    const subjectToAdd = subjects.find(s => s.id === id);
-    const currentSelected = subjects.filter(s => selected.has(s.id));
+    const subjectToAdd = subjects.find(s => String(s.id) === targetId);
+    if(!subjectToAdd) return;
+    const currentSelected = subjects.filter(s => selected.has(String(s.id)));
     let conflictNames = []; let duplicateName = false;
 
     for(const sel of currentSelected) { 
-      if(slotsOverlap(subjectToAdd.slots, sel.slots)) conflictNames.push(sel.name); 
-      if(sel.name.trim().toLowerCase() === subjectToAdd.name.trim().toLowerCase()) duplicateName = true;
+      if(slotsOverlap(subjectToAdd.slots, sel.slots)) conflictNames.push(String(sel.name || '')); 
+      if(String(sel.name || '').trim().toLowerCase() === String(subjectToAdd.name || '').trim().toLowerCase()) duplicateName = true;
     }
     
     if(duplicateName) {
-      alertBox.textContent = `⚠️ Acción bloqueada: Ya tienes seleccionada "${subjectToAdd.name}" en tu horario.`; alertBox.classList.add('show'); return;
+      alertBox.textContent = `⚠️ Acción bloqueada: Ya tienes seleccionada "${String(subjectToAdd.name || '')}" en tu horario.`; alertBox.classList.add('show'); return;
     }
     if(conflictNames.length > 0) {
-      alertBox.textContent = `⚠️ Acción bloqueada: "${subjectToAdd.name}" choca con "${conflictNames.join(', ')}".`; alertBox.classList.add('show'); return; 
+      alertBox.textContent = `⚠️ Acción bloqueada: "${String(subjectToAdd.name || '')}" choca con "${conflictNames.join(', ')}".`; alertBox.classList.add('show'); return; 
     } 
-    selected.add(id); alertBox.classList.remove('show'); 
+    selected.add(targetId); alertBox.classList.remove('show'); 
   }
+  document.getElementById('currentOptionLabel').textContent = ''; 
   saveData(); renderSidebar(); renderGrid();
 }
 
-function clearSelection() { selected.clear(); document.getElementById('conflictAlert').classList.remove('show'); saveData(); renderSidebar(); renderGrid(); }
+function clearSelection() { 
+  selected.clear(); 
+  document.getElementById('conflictAlert').classList.remove('show'); 
+  document.getElementById('currentOptionLabel').textContent = '';
+  document.getElementById('quickParaleloSelect').value = '';
+  saveData(); renderSidebar(); renderGrid(); 
+}
 
 function exportSchedule() {
   if (selected.size === 0) { alert("¡El horario está vacío! Agrega materias antes de exportar."); return; }
@@ -911,7 +941,7 @@ function exportSchedule() {
 // ── AUTO-GENERADOR ──
 function calculateGaps(combo) {
   let gaps = 0; const slotsByDay = { 'LUNES':[], 'MARTES':[], 'MIÉRCOLES':[], 'JUEVES':[], 'VIERNES':[] };
-  combo.forEach(s => s.slots.forEach(sl => slotsByDay[sl.day].push({ start: Number(sl.start), end: Number(sl.end) })));
+  combo.forEach(s => (s.slots||[]).forEach(sl => slotsByDay[sl.day].push({ start: Number(sl.start), end: Number(sl.end) })));
   for (const day in slotsByDay) {
       const ds = slotsByDay[day].sort((a,b) => a.start - b.start);
       for(let i=0; i<ds.length-1; i++) {
@@ -933,7 +963,7 @@ function generateAutoSchedules() {
   setTimeout(() => {
     const groups = {};
     subjects.forEach(s => {
-      const bName = s.name.trim().toLowerCase();
+      const bName = String(s.name || '').trim().toLowerCase();
       if(allowedSubjects.includes(bName)) {
         if(!groups[bName]) groups[bName] = [];
         groups[bName].push(s);
@@ -972,8 +1002,8 @@ function generateAutoSchedules() {
       if(b.length !== a.length) return b.length - a.length;
       const gapsA = calculateGaps(a); const gapsB = calculateGaps(b);
       if (gapsA !== gapsB) return gapsA - gapsB;
-      const hA = a.reduce((acc, s) => acc + s.slots.reduce((sum,sl) => sum + (Number(sl.end) - Number(sl.start)), 0), 0);
-      const hB = b.reduce((acc, s) => acc + s.slots.reduce((sum,sl) => sum + (Number(sl.end) - Number(sl.start)), 0), 0);
+      const hA = a.reduce((acc, s) => acc + (s.slots||[]).reduce((sum,sl) => sum + (Number(sl.end) - Number(sl.start)), 0), 0);
+      const hB = b.reduce((acc, s) => acc + (s.slots||[]).reduce((sum,sl) => sum + (Number(sl.end) - Number(sl.start)), 0), 0);
       return hA - hB; 
     });
 
@@ -983,9 +1013,12 @@ function generateAutoSchedules() {
   }, 100);
 }
 
-function applyAutoCombo(idsArray) {
-  selected = new Set(idsArray); saveData(); renderSidebar(); renderGrid();
-  showToast("✅ Horario aplicado correctamente"); switchView('schedule');
+function applyAutoCombo(idsArray, indexOption) {
+  selected = new Set(idsArray.map(String)); 
+  document.getElementById('currentOptionLabel').textContent = `(Viendo Opción #${indexOption})`;
+  document.getElementById('quickParaleloSelect').value = '';
+  saveData(); renderSidebar(); renderGrid();
+  showToast(`✅ Opción #${indexOption} aplicada correctamente`); switchView('schedule');
 }
 
 function renderAutoResults() {
@@ -1000,13 +1033,13 @@ function renderAutoResults() {
   
   for(let i = 0; i < limit; i++) {
     const combo = generatedCombinations[i];
-    const totalHours = combo.reduce((acc, s) => acc + s.slots.reduce((a,sl) => a + (Number(sl.end) - Number(sl.start)), 0), 0);
+    const totalHours = combo.reduce((acc, s) => acc + (s.slots||[]).reduce((a,sl) => a + (Number(sl.end) - Number(sl.start)), 0), 0);
     const gaps = calculateGaps(combo);
-    const idsJson = JSON.stringify(combo.map(s => s.id));
+    const idsJson = JSON.stringify(combo.map(s => String(s.id)));
     
     let subjectsHtml = combo.map(s => {
        const pinHtml = s.isMandatory ? '<span style="color:var(--danger); font-size:0.7rem; margin-right:4px;" title="Obligatoria">📌</span>' : '';
-       return `<div class="auto-subject"><span class="auto-subject-name">${pinHtml}${s.name}</span><span class="auto-subject-course">Paralelo: ${s.course}</span></div>`;
+       return `<div class="auto-subject"><span class="auto-subject-name">${pinHtml}${String(s.name||'')}</span><span class="auto-subject-course">Paralelo: ${String(s.course||'')}</span></div>`;
     }).join('');
     
     html += `
@@ -1016,7 +1049,7 @@ function renderAutoResults() {
           <div class="auto-card-stats">${combo.length} Materias • ${totalHours} hrs clase • ${gaps} hrs huecas</div>
         </div>
         <div>${subjectsHtml}</div>
-        <button class="btn primary" style="width: 100%; margin-top: 12px; font-size:0.8rem;" onclick='applyAutoCombo(${idsJson})'>Aplicar este horario</button>
+        <button class="btn primary" style="width: 100%; margin-top: 12px; font-size:0.8rem;" onclick='applyAutoCombo(${idsJson}, ${i+1})'>Aplicar este horario</button>
       </div>`;
   }
   if(generatedCombinations.length > 50) html += `<div style="text-align:center; color:var(--muted); font-size:0.8rem; margin-top:10px;">Mostrando las 50 mejores opciones.</div>`;
@@ -1027,10 +1060,10 @@ function downloadFullScript() {
   if(!generatedCombinations.length) return;
   let txt = `TODAS LAS POSIBILIDADES DE HORARIOS\n===============================================\n\n`;
   generatedCombinations.forEach((combo, index) => {
-    const totalHours = combo.reduce((acc, s) => acc + s.slots.reduce((a,sl) => a + (Number(sl.end) - Number(sl.start)), 0), 0);
+    const totalHours = combo.reduce((acc, s) => acc + (s.slots||[]).reduce((a,sl) => a + (Number(sl.end) - Number(sl.start)), 0), 0);
     const gaps = calculateGaps(combo);
     txt += `--- OPCIÓN #${index + 1} ---\nResumen: ${combo.length} Materias | ${totalHours} Horas totales | ${gaps} Horas huecas\n`;
-    combo.forEach(s => { txt += ` > ${s.name} - ${s.course}\n`; }); txt += `\n`;
+    combo.forEach(s => { txt += ` > ${String(s.name||'')} - ${String(s.course||'')}\n`; }); txt += `\n`;
   });
   const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
   const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'Posibilidades_Horarios.txt'; link.click();
@@ -1046,6 +1079,7 @@ function downloadHTMLCatalog() {
   <head>
     <meta charset="UTF-8"><title>Catálogo de Horarios Generados</title>
     <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
       body { background: ${expBg}; color: ${expText}; font-family: sans-serif; padding: 40px; margin: 0; }
       h1 { text-align: center; color: ${isLightMode ? '#1a73e8' : '#a8c7fa'}; margin-bottom: 40px; }
       .schedule-container { margin-bottom: 60px; background: ${expSurf}; padding: 20px; border-radius: 12px; border: 1px solid ${expBorder}; overflow-x: auto; }
@@ -1056,7 +1090,8 @@ function downloadHTMLCatalog() {
       .grid-col { position:relative; border-right:1px solid rgba(0,0,0,0.08); }
       .grid-col:last-child { border-right:none; }
       .hour-col { border-right:1px solid rgba(0,0,0,0.08); }
-      .hour-cell { height:52px; border-bottom:1px solid rgba(0,0,0,0.08); display:flex; align-items:center; justify-content:center; padding:0 4px; font-size:10px; color:#666; font-weight:bold; text-align:center; line-height:1.2; }
+      /* CSS estricto para evitar solapamientos por desbordamiento de fuente */
+      .hour-cell { height:52px; max-height:52px; overflow:hidden; border-bottom:1px solid rgba(0,0,0,0.08); display:flex; align-items:center; justify-content:center; padding:0 4px; font-size:10px; color:#666; font-weight:bold; text-align:center; line-height:1.2; }
       .hour-cell:last-child { border-bottom:none; }
       .day-col { position:relative; height:calc(52px * 13); }
       .day-stripe { position:absolute; left:0; right:0; border-bottom:1px solid rgba(0,0,0,0.08); }
@@ -1069,7 +1104,7 @@ function downloadHTMLCatalog() {
   `;
 
   generatedCombinations.forEach((combo, index) => {
-    const totalHours = combo.reduce((acc, s) => acc + s.slots.reduce((a,sl) => a + (Number(sl.end) - Number(sl.start)), 0), 0);
+    const totalHours = combo.reduce((acc, s) => acc + (s.slots||[]).reduce((a,sl) => a + (Number(sl.end) - Number(sl.start)), 0), 0);
     const gaps = calculateGaps(combo);
     let gridHTML = `<div class="grid-head hour-col"></div>`;
     DAYS.forEach(d => gridHTML += `<div class="grid-head">${d}</div>`);
@@ -1080,9 +1115,9 @@ function downloadHTMLCatalog() {
       gridHTML += `<div class="grid-col"><div class="day-col">`;
       HOURS.forEach((_,i) => gridHTML += `<div class="day-stripe" style="top:${i*52}px;height:52px"></div>`);
       combo.forEach(s => {
-        s.slots.filter(sl => sl.day === day).forEach(sl => {
+        (s.slots||[]).filter(sl => sl.day === day).forEach(sl => {
           const top = (Number(sl.start) - HOURS_START) * 52 + 2; const height = ((Number(sl.end) - Number(sl.start)) * 52) - 4;
-          gridHTML += `<div class="block" style="top:${top}px;height:${height}px;background:${s.color};border-left:4px solid rgba(0,0,0,0.2);"><div class="block-name">${s.name}</div><div class="block-detail">${s.course} | ${sl.start}:00–${sl.end}:00</div></div>`;
+          gridHTML += `<div class="block" style="top:${top}px;height:${height}px;background:${s.color};border-left:4px solid rgba(0,0,0,0.2);"><div class="block-name">${String(s.name||'')}</div><div class="block-detail">${String(s.course||'')} | ${sl.start}:00–${sl.end}:00</div></div>`;
         });
       });
       gridHTML += `</div></div>`;
@@ -1094,39 +1129,54 @@ function downloadHTMLCatalog() {
   const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'Catalogo_Horarios.html'; link.click();
 }
 
-// ── MODAL LOGIC & ATAJOS ──
+// ── MODAL LOGIC & ATAJOS BLINDADOS ──
 document.addEventListener('keydown', e => {
     if(e.key === 'Escape' && document.getElementById('overlay').classList.contains('show')) closeModal();
 });
 
+// Auto-seleccionar color y semestre basado en materias existentes con el mismo nombre
 document.getElementById('fName').addEventListener('input', function(e) {
-  const inputName = e.target.value.trim().toLowerCase();
-  const existingSubject = subjects.find(s => s.name.trim().toLowerCase() === inputName);
-  if (existingSubject) { document.getElementById('fLevel').value = existingSubject.level; }
+  const inputName = String(e.target.value || '').trim().toLowerCase();
+  const existingSubject = subjects.find(s => String(s.name || '').trim().toLowerCase() === inputName);
+  if (existingSubject) { 
+      document.getElementById('fLevel').value = String(existingSubject.level || '').replace(/\D/g, ''); 
+      chosenColor = existingSubject.color || COLORS[0];
+      renderColorRow();
+  }
 });
 
+function editSubject(id) { openModal(String(id)); }
+
 function openModal(id) {
+  if (id === 'undefined' || id === 'null' || typeof id === 'object') id = null;
   editingId = id || null; slots = []; chosenColor = COLORS[0];
   updateDatalist(); 
-  if(id) {
-    const s = subjects.find(x=>x.id===id);
-    document.getElementById('modalTitle').textContent = 'Editar Materia';
-    document.getElementById('fName').value = s.name;
-    document.getElementById('fLevel').value = s.level;
-    document.getElementById('fCourse').value = s.course.replace('P-', '').replace('(Copia)', '').trim();
-    document.getElementById('fNote').value = s.note || '';
-    document.getElementById('fMandatory').checked = s.isMandatory || false;
-    chosenColor = s.color; slots = s.slots.map(sl => ({...sl}));
+  
+  if(editingId) {
+    const s = subjects.find(x => String(x.id) === String(editingId));
+    if(!s) { showToast("⚠️ Error: Paralelo no encontrado."); return; }
+    
+    document.getElementById('modalTitle').textContent = 'Editar Paralelo';
+    document.getElementById('fName').value = String(s.name || '');
+    document.getElementById('fLevel').value = String(s.level || '').replace(/\D/g, '');
+    document.getElementById('fCourse').value = String(s.course || '').replace('P-', '').replace('(Copia)', '').trim();
+    document.getElementById('fNote').value = String(s.note || '');
+    document.getElementById('fMandatory').checked = s.isMandatory === true;
+    chosenColor = s.color || COLORS[0]; 
+    slots = (s.slots || []).map(sl => ({...sl}));
+    document.getElementById('btnModalDelete').style.display = 'block'; 
   } else {
-    document.getElementById('modalTitle').textContent = 'Nueva Materia';
+    document.getElementById('modalTitle').textContent = 'Nueva Materia / Paralelo';
     document.getElementById('fName').value = ''; document.getElementById('fLevel').value = ''; 
     document.getElementById('fCourse').value = ''; document.getElementById('fNote').value = '';
     document.getElementById('fMandatory').checked = false;
     slots = [{day:'LUNES', start:7, end:8}];
+    document.getElementById('btnModalDelete').style.display = 'none'; 
   }
   renderColorRow(); renderSlots(); document.getElementById('overlay').classList.add('show');
 }
 function closeModal() { document.getElementById('overlay').classList.remove('show'); editingId = null; }
+
 function renderColorRow() { const row = document.getElementById('colorRow'); row.innerHTML = COLORS.map(c => `<div class="color-dot ${c===chosenColor?'selected':''}" style="background:${c}" onclick="selectColor('${c}')"></div>`).join(''); }
 function selectColor(c) { chosenColor = c; renderColorRow(); }
 
@@ -1151,22 +1201,23 @@ function addSlot() {
 }
 
 function saveSubject() {
-  const name = document.getElementById('fName').value.trim();
+  const name = String(document.getElementById('fName').value || '').trim();
   if(!name) { alert('Ingresa el nombre de la materia'); return; }
   
-  const courseInput = document.getElementById('fCourse').value.trim() || '1';
+  const courseInput = String(document.getElementById('fCourse').value || '').trim() || '1';
   const formattedCourse = 'P-' + courseInput;
+  const levelInput = String(document.getElementById('fLevel').value || '').trim() || '1';
+  const formattedLevel = 'Semestre ' + levelInput;
   
-  const isDuplicate = subjects.some(s => s.id !== editingId && s.name.trim().toLowerCase() === name.toLowerCase() && s.course === formattedCourse);
+  const isDuplicate = subjects.some(s => String(s.id) !== String(editingId) && String(s.name || '').trim().toLowerCase() === name.toLowerCase() && String(s.course || '') === formattedCourse);
   if(isDuplicate) {
-      alert(`⚠️ Ya existe "${name}" en el paralelo ${formattedCourse}.\nSi deseas cambiar sus horas, edita la materia existente en la pestaña "Gestionar Materias".`);
+      alert(`⚠️ Ya existe "${name}" en el paralelo ${formattedCourse}.\nSi deseas cambiar sus horas, edita el paralelo existente.`);
       return;
   }
 
   const currentSlots = [];
   const slotRows = document.querySelectorAll('.slot-row');
-  let invalidTime = false;
-  let internalConflict = false;
+  let invalidTime = false; let internalConflict = false;
   
   slotRows.forEach(row => {
     const d = row.querySelector('.s-day').value;
@@ -1182,32 +1233,38 @@ function saveSubject() {
   });
 
   if(invalidTime) { alert('⚠️ Hay horas inválidas. Asegúrate de usar formato 24h (7 a 20), sin decimales, y que la hora de inicio sea menor a la de fin.'); return; }
-  if(internalConflict) { alert('⚠️ Hay bloques de horas que se cruzan entre sí en esta misma materia. Corrige las horas.'); return; }
+  if(internalConflict) { alert('⚠️ Hay bloques de horas que se cruzan entre sí en este mismo paralelo. Corrige las horas.'); return; }
   if(currentSlots.length === 0) { alert('Agrega al menos un bloque horario válido'); return; }
 
-  const noteVal = document.getElementById('fNote').value.trim();
+  const noteVal = String(document.getElementById('fNote').value || '').trim();
   const isMandatory = document.getElementById('fMandatory').checked;
 
   const s = {
     id: editingId || getNextId(), name,
-    level: document.getElementById('fLevel').value || 'Sin Nivel',
+    level: formattedLevel,
     course: formattedCourse, color: chosenColor, slots: currentSlots, note: noteVal, isMandatory: isMandatory
   };
 
-  if(editingId) { const idx = subjects.findIndex(x=>x.id===editingId); subjects[idx] = s; selected.delete(editingId); } 
-  else { subjects.push(s); }
+  if(editingId) { 
+      const idx = subjects.findIndex(x => String(x.id) === String(editingId)); 
+      if(idx !== -1) subjects[idx] = s; 
+  } else { 
+      subjects.push(s); 
+  }
   
   saveData(); closeModal(); renderSidebar(); renderGrid(); renderManage(); renderAutoSelection(); updateDatalist(); updateQuickParaleloSelect();
   showToast("✅ Materia guardada con éxito");
 }
 
-function deleteSubject(id) {
-  if(!confirm('¿Eliminar esta materia?')) return;
-  subjects = subjects.filter(s=>s.id!==id); selected.delete(id);
-  saveData(); renderSidebar(); renderGrid(); renderManage(); renderAutoSelection(); updateDatalist(); updateQuickParaleloSelect();
-  showToast("🗑️ Materia eliminada");
+function deleteSubjectFromModal() {
+  if(!editingId) return;
+  if(!confirm('¿Eliminar este paralelo permanentemente?')) return;
+  subjects = subjects.filter(s => String(s.id) !== String(editingId)); 
+  selected.delete(String(editingId)); 
+  selected.delete(Number(editingId)); 
+  saveData(); closeModal(); renderSidebar(); renderGrid(); renderManage(); renderAutoSelection(); updateDatalist(); updateQuickParaleloSelect();
+  showToast("🗑️ Paralelo eliminado");
 }
-function editSubject(id) { openModal(id); }
 
 function switchView(v) {
   document.getElementById('viewSchedule').style.display = v==='schedule' ? 'flex' : 'none';
