@@ -65,8 +65,11 @@
   header h1 { font-family:'Syne',sans-serif; font-size:1.2rem; font-weight:800; letter-spacing:-.5px; white-space: nowrap; text-transform: uppercase; }
   header h1 span { background: -webkit-linear-gradient(45deg, var(--text), var(--muted)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .mobile-menu-btn { display: none; background: transparent; border: none; color: var(--text); font-size: 1.5rem; cursor: pointer; padding: 5px; }
-  .theme-toggle { background: transparent; border: none; font-size: 1.2rem; cursor: pointer; margin-left: auto; padding: 5px; opacity: 0.8; transition: 0.2s; }
+  
+  .header-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  .theme-toggle { background: transparent; border: none; font-size: 1.2rem; cursor: pointer; padding: 5px; opacity: 0.8; transition: 0.2s; }
   .theme-toggle:hover { opacity: 1; transform: scale(1.1); }
+  
   .tabs { display:flex; gap:4px; overflow-x: auto; white-space: nowrap; padding-bottom: 4px; }
   .tabs::-webkit-scrollbar { height: 0; }
   .tab { background:transparent; border:none; color:var(--muted); font-family:'DM Sans',sans-serif; font-size:.85rem; font-weight:500; padding:8px 16px; border-radius:6px; cursor:pointer; transition:.2s; }
@@ -107,6 +110,8 @@
   .btn:hover { border-color:var(--accent); background:var(--surface3); }
   .btn.primary { background:var(--accent); color:var(--accent-text) !important; border-color:var(--accent); }
   .btn.primary:hover { opacity:.9; transform:translateY(-1px); background:var(--accent); }
+  .btn.danger { color:var(--danger); border-color:rgba(242, 139, 130, 0.4); }
+  .btn.danger:hover { background:var(--danger-bg); border-color:var(--danger); }
 
   /* ── RIGHT PANELS & GRID ── */
   .right { flex:1; overflow:auto; display:flex; flex-direction:column; }
@@ -126,7 +131,8 @@
   .grid-scroll-container::-webkit-scrollbar { height: 8px; }
   .grid-scroll-container::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 4px; }
 
-  .grid-wrap { display:grid; grid-template-columns:60px repeat(5,1fr); border:1px solid var(--border); border-radius:12px; overflow:hidden; background: var(--grid-bg); min-width: 700px; height: 100%; }
+  /* Dinamismo de Grid */
+  .grid-wrap { display:grid; border:1px solid var(--border); border-radius:12px; overflow:hidden; background: var(--grid-bg); min-width: 700px; height: 100%; }
   .grid-head { background:var(--surface2); padding:12px 6px; text-align:center; font-family:'Syne',sans-serif; font-size:.75rem; font-weight:700; letter-spacing:.5px; color:var(--muted); text-transform:uppercase; border-bottom:1px solid var(--border); display: flex; flex-direction: column; justify-content: center; gap: 2px;}
   .day-hours-badge { font-size: 0.6rem; background: var(--surface3); padding: 2px 6px; border-radius: 10px; color: var(--text); display: inline-block; margin-top: 4px;}
   .grid-head:first-child { border-right:1px solid rgba(0,0,0,0.08); }
@@ -135,7 +141,7 @@
   .hour-col { border-right:1px solid rgba(0,0,0,0.08); }
   .hour-cell { height:var(--grid-hour); border-bottom:1px solid rgba(0,0,0,0.08); display:flex; align-items:center; justify-content:center; padding:0 2px; font-size:.65rem; color:#666; font-weight:700; text-align:center; line-height:1.2; }
   .hour-cell:last-child { border-bottom:none; }
-  .day-col { position:relative; height:calc(var(--grid-hour) * 13); }
+  .day-col { position:relative; }
   .day-stripe { position:absolute; left:0; right:0; border-bottom:1px solid rgba(0,0,0,0.08); }
   
   .block { position:absolute; left:4px; right:4px; border-radius:6px; padding:6px 8px; overflow:hidden; cursor:default; transition:.15s; z-index:2; border:1px solid rgba(0,0,0,0.1); box-shadow:0 2px 6px rgba(0,0,0,.2); color:#131314; display:flex; flex-direction:column; justify-content:flex-start;}
@@ -165,12 +171,14 @@
   /* ── MANAGE VIEW (REDISEÑADO) & MODAL ── */
   .manage-wrap { padding:24px; flex:1; overflow:auto; }
   .manage-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; }
-  .manage-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; display:flex; flex-direction:column; transition:all .3s ease; box-shadow:0 4px 6px rgba(0,0,0,.1); }
+  .manage-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; display:flex; flex-direction:column; transition:all .3s ease; box-shadow:0 4px 6px rgba(0,0,0,.1); position: relative; }
   .manage-card:hover { border-color:var(--muted2); box-shadow:0 8px 15px rgba(0,0,0,.15); }
   
-  /* Botones de paralelo blindados y más visibles */
   .parallel-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 700; transition: all 0.2s ease; outline: none; }
   .parallel-btn:hover { background: var(--surface3); border-color: var(--accent); color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+  
+  .global-rm-btn { position: absolute; top: 12px; right: 12px; background: transparent; border: none; font-size: 1.1rem; color: var(--muted); cursor: pointer; transition: 0.2s; padding: 4px; border-radius: 6px; }
+  .global-rm-btn:hover { color: var(--danger); background: var(--danger-bg); transform: scale(1.1); }
 
   .overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:200; display:none; align-items:center; justify-content:center; backdrop-filter: blur(3px); }
   .overlay.show { display:flex; }
@@ -196,14 +204,33 @@
   .color-dot.selected { border-color:var(--text); transform:scale(1.15); box-shadow:0 0 0 2px var(--bg) inset; }
   .modal-actions { display:flex; gap:12px; margin-top:24px; }
 
+  /* GRID INPUT MODE */
+  .input-mode-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .input-grid-table { width: 100%; border-collapse: collapse; border: 1px solid var(--border); background: var(--surface2); border-radius: 8px; overflow: hidden; table-layout: fixed; }
+  .input-grid-table th { background: var(--surface3); font-size: 0.7rem; padding: 6px 2px; text-transform: uppercase; color: var(--muted); font-weight: 700; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); }
+  .input-grid-table td { border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); text-align: center; height: 30px; cursor: pointer; transition: 0.1s; position: relative; }
+  .input-grid-table td:hover { background: var(--surface3); }
+  .input-grid-table td.active { background: var(--accent); }
+  .input-grid-table td.active::after { content: '✓'; color: var(--accent-text); font-weight: bold; font-size: 0.8rem; }
+  .time-lbl { font-size: 0.65rem; color: var(--muted2); font-weight: 700; pointer-events: none; }
+
+  /* SETTINGS STYLES */
+  .settings-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--surface3); }
+  .settings-row:last-child { border-bottom: none; }
+  .settings-label { font-size: 0.9rem; font-weight: 500; color: var(--text); }
+  .settings-desc { font-size: 0.75rem; color: var(--muted); margin-top: 4px; }
+  .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--surface3); transition: .4s; border-radius: 24px; }
+  .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+  input:checked + .slider { background-color: var(--accent); }
+  input:checked + .slider:before { transform: translateX(20px); }
+
   .stats-bar { padding:14px 24px; border-top:1px solid var(--border); display:flex; gap:24px; background:var(--surface); flex-shrink:0; align-items:center; justify-content: space-between; flex-wrap: wrap;}
   .stat { font-size:.8rem; color:var(--muted); }
   .stat-counter-wrap { cursor:help; display:inline-block; padding-bottom:2px; border-bottom:1px dotted var(--muted); }
   .stat strong { color:var(--accent); font-weight:700; font-size:.9rem;}
   .watermark-legend { font-size: .75rem; color: var(--muted2); font-weight: 500; }
-  
-  #togglePinBtn { cursor: pointer; transition: 0.2s; color: var(--accent2); font-weight: 700; }
-  #togglePinBtn:hover { opacity: 0.8; text-decoration: underline dashed rgba(120,120,120,0.4); }
   
   .link-david { color: var(--accent2); font-weight: 700; text-decoration: none; transition: 0.2s; }
   .link-david:hover { text-decoration: underline; }
@@ -221,7 +248,7 @@
   @media (max-width: 768px) {
     header { padding: 10px 16px; height: auto; }
     .mobile-menu-btn { display: block; }
-    .theme-toggle { margin-left: 0; margin-right: 10px; }
+    .header-actions { margin-left: 0; margin-right: 10px; }
     .sidebar { position: absolute; left: -320px; top: 0; bottom: 0; z-index: 1000; box-shadow: 5px 0 15px rgba(0,0,0,0.3); }
     .sidebar.show { transform: translateX(320px); }
     .close-sidebar-btn { display: block; }
@@ -275,7 +302,7 @@
   </div>
   
   <div class="login-footer watermark-legend">
-    <span id="btnForceLogin">Hecho</span> por <span id="btnDisclaimer" style="cursor:pointer; color:var(--accent2); font-weight:700;">Gemini</span> y 
+    <span id="btnForceLogin">Hecho</span> por <span id="footerGeminiBtn" style="cursor:pointer; color:var(--accent2); font-weight:700;">Gemini</span> y 
     <a href="https://www.instagram.com/david_c204/" target="_blank" class="link-david">DAVID</a>
   </div>
 </div>
@@ -284,7 +311,10 @@
   <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" id="mobileMenuBtn">☰</button>
   <h1>CREA <span>HORARIOS</span></h1>
   
-  <button class="theme-toggle" onclick="toggleTheme()" title="Cambiar Tema" id="themeIcon">☀️</button>
+  <div class="header-actions">
+    <button class="theme-toggle" onclick="toggleTheme()" title="Cambiar Tema" id="themeIcon">☀️</button>
+    <button class="theme-toggle" onclick="openSettings()" title="Ajustes Globales">⚙️</button>
+  </div>
   
   <div class="tabs">
     <button class="tab active" onclick="switchView('schedule')">Construir Horario</button>
@@ -340,7 +370,7 @@
         <span class="stat" style="margin-left: 15px;">Horas/semana: <strong id="statHours">0</strong></span>
         <span class="stat" style="margin-left: 15px;">Horas huecas: <strong id="statGaps">0</strong></span>
       </div>
-      <div class="watermark-legend">Hecho por <span id="togglePinBtn" title="Activar/Desactivar PIN">Gemini</span> y <a href="https://www.instagram.com/david_c204/" target="_blank" class="link-david">DAVID</a></div>
+      <div class="watermark-legend">Hecho por <span id="footerGeminiBtn2" style="color:var(--accent2); font-weight:700; cursor:help;">Gemini</span> y <a href="https://www.instagram.com/david_c204/" target="_blank" class="link-david">DAVID</a></div>
     </div>
   </div>
 
@@ -380,7 +410,6 @@
           <button class="btn" onclick="document.getElementById('importFile').click()">📥 Importar</button>
           <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
           <button class="btn" onclick="exportData()">📤 Exportar</button>
-          <button class="btn" onclick="deleteAllSubjects()" style="color:var(--danger); border-color:rgba(242, 139, 130, 0.4);">🗑️ Borrar Todas</button>
           <button class="btn primary" onclick="openModal(null)">Agregar materia</button>
         </div>
       </div>
@@ -433,14 +462,92 @@
       <label>Color</label>
       <div class="color-row" id="colorRow"></div>
     </div>
-    <div class="form-group">
-      <label>Bloques horarios</label>
-      <div class="slot-list" id="slotList"></div>
-      <button class="add-slot-btn" onclick="addSlot()">+ Agregar bloque</button>
+    
+    <div class="form-group" style="margin-top: 20px;">
+      <div class="input-mode-header">
+        <label style="margin:0;">Horario <span id="lblModeIndicator" style="color:var(--accent); font-weight:700;"></span></label>
+      </div>
+      
+      <div id="containerListMode">
+        <div class="slot-list" id="slotList"></div>
+        <button class="add-slot-btn" onclick="addSlot()">+ Agregar bloque</button>
+      </div>
+
+      <div id="containerGridMode" style="display:none;">
+        <table class="input-grid-table" id="inputGridTable"></table>
+        <div style="font-size:0.7rem; color:var(--muted); margin-top:6px; text-align:center;">Haz clic en las celdas para pintar las horas de clase.</div>
+      </div>
     </div>
+    
     <div class="modal-actions">
       <button class="btn primary" onclick="saveSubject()">Guardar</button>
       <button class="btn" onclick="closeModal()">Cancelar (Esc)</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="settingsOverlay">
+  <div class="modal" style="max-width: 450px;">
+    <h2 style="margin-bottom: 20px; font-family: 'Syne', sans-serif;">Ajustes Globales</h2>
+    
+    <div class="settings-row">
+      <div>
+        <div class="settings-label">Modo de Ingreso de Horas</div>
+        <div class="settings-desc">En el editor de materias.</div>
+      </div>
+      <select id="setMode" class="quick-select" style="width: auto; padding: 4px 8px;">
+        <option value="list">📝 Lista (Clásico)</option>
+        <option value="grid">▦ Cuadrícula (Pintar)</option>
+      </select>
+    </div>
+
+    <div class="settings-row">
+      <div>
+        <div class="settings-label">Días Hábiles (Sábado)</div>
+        <div class="settings-desc">Mostrar Sábado en la app y el editor.</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="setSat">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="settings-row">
+      <div>
+        <div class="settings-label">Rango Horario (Vista Principal)</div>
+        <div class="settings-desc">Recorta el horario visual para fotos limpias.</div>
+      </div>
+      <div style="display: flex; gap: 5px; align-items: center;">
+        <select id="setStartH" class="quick-select" style="padding: 4px 8px; width: auto;">
+          <script>for(let i=7; i<19; i++) document.write(`<option value="${i}">${i}:00</option>`);</script>
+        </select> a 
+        <select id="setEndH" class="quick-select" style="padding: 4px 8px; width: auto;">
+          <script>for(let i=10; i<=20; i++) document.write(`<option value="${i}">${i}:00</option>`);</script>
+        </select>
+      </div>
+    </div>
+
+    <div class="settings-row">
+      <div>
+        <div class="settings-label">Bloqueo por PIN</div>
+        <div class="settings-desc">Pedir PIN al iniciar la página.</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="setPin">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="settings-row" style="margin-top: 30px; border-top: 1px solid var(--danger); padding-top: 20px;">
+      <div>
+        <div class="settings-label" style="color: var(--danger);">Zona de Peligro</div>
+        <div class="settings-desc">Borrar TODAS las materias registradas.</div>
+      </div>
+      <button class="btn" style="color:var(--danger); border-color:rgba(242, 139, 130, 0.4);" onclick="closeSettings(); deleteAllSubjects();">🗑️ Vaciar Horario</button>
+    </div>
+
+    <div class="modal-actions" style="margin-top: 20px;">
+      <button class="btn primary" onclick="saveSettings()" style="width: 100%;">Aplicar y Cerrar</button>
     </div>
   </div>
 </div>
@@ -496,13 +603,54 @@ function toggleTheme() {
   updateThemeIcon();
 }
 
+// ── VARIABLES GLOBALES Y AJUSTES (V2) ──
+let gMode = localStorage.getItem('h_mode') || 'list';
+let gSat = localStorage.getItem('h_sat') === 'true';
+let gStartH = parseInt(localStorage.getItem('h_start')) || 7;
+let gEndH = parseInt(localStorage.getItem('h_end')) || 20;
+let gPin = localStorage.getItem('horario_pin_enabled') === null ? true : localStorage.getItem('horario_pin_enabled') === 'true';
+
+function getActiveDays() { return gSat ? ['LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES','SÁBADO'] : ['LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES']; }
+
+function openSettings() {
+  document.getElementById('setMode').value = gMode;
+  document.getElementById('setSat').checked = gSat;
+  document.getElementById('setStartH').value = gStartH;
+  document.getElementById('setEndH').value = gEndH;
+  document.getElementById('setPin').checked = gPin;
+  document.getElementById('settingsOverlay').classList.add('show');
+}
+
+function closeSettings() {
+  document.getElementById('settingsOverlay').classList.remove('show');
+}
+
+function saveSettings() {
+  const s = parseInt(document.getElementById('setStartH').value);
+  const e = parseInt(document.getElementById('setEndH').value);
+  if(s >= e) { alert("⚠️ La hora de inicio debe ser menor a la hora de fin."); return; }
+  
+  gMode = document.getElementById('setMode').value;
+  gSat = document.getElementById('setSat').checked;
+  gStartH = s; gEndH = e;
+  gPin = document.getElementById('setPin').checked;
+  
+  localStorage.setItem('h_mode', gMode);
+  localStorage.setItem('h_sat', gSat);
+  localStorage.setItem('h_start', gStartH);
+  localStorage.setItem('h_end', gEndH);
+  localStorage.setItem('horario_pin_enabled', gPin);
+  
+  closeSettings();
+  renderGrid(); renderManage(); renderSidebar(); 
+  if(document.getElementById('viewAuto').style.display === 'flex') renderAutoSelection();
+  showToast("⚙️ Ajustes globales aplicados");
+}
+
 const DB_KEY = 'horario_materias_db';
 const SEL_KEY = 'horario_materias_seleccionadas';
 const PIN_KEY = 'horario_pin_enabled';
 
-const DAYS = ['LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES'];
-const HOURS_START = 7, HOURS_END = 20;
-const HOURS = Array.from({length: HOURS_END - HOURS_START}, (_,i) => HOURS_START + i);
 /* 3 NUEVOS COLORES AÑADIDOS A LA PALETA */
 const COLORS = ['#a8c7fa','#e5c07b','#81c995','#fde293','#f28b82','#78d9ec','#fcaded','#a8dab5','#fcb97d','#8ab4f8', '#b39ddb', '#ffcc80', '#80cbc4'];
 
@@ -510,6 +658,7 @@ let subjects = [];
 let selected = new Set();
 let editingId = null;
 let chosenColor = COLORS[0];
+let activeGridCells = new Set(); 
 let generatedCombinations = [];
 let unselectedAutoFilters = new Set(); 
 
@@ -519,8 +668,7 @@ const pinInputs = document.querySelectorAll('.pin-input');
 const loginScreen = document.getElementById('loginScreen');
 const loginError = document.getElementById('loginError');
 
-let isPinEnabled = localStorage.getItem(PIN_KEY) === null ? true : localStorage.getItem(PIN_KEY) === 'true';
-if (!isPinEnabled) { loginScreen.style.display = 'none'; }
+if (!gPin) { loginScreen.style.display = 'none'; }
 
 pinInputs.forEach((input, index) => {
   input.addEventListener('input', (e) => {
@@ -549,14 +697,10 @@ function validatePIN() {
 }
 
 document.getElementById('btnForceLogin').addEventListener('click', () => { validatePIN(); });
-document.getElementById('btnDisclaimer').addEventListener('click', () => { alert("Uso exclusivamente estudiantil y sin fines de lucro. Se permite la copia y modificación, siempre que no medie comercialización"); });
 
-document.getElementById('togglePinBtn').addEventListener('click', () => {
-  isPinEnabled = !isPinEnabled;
-  localStorage.setItem(PIN_KEY, isPinEnabled);
-  if(isPinEnabled) { showToast("🔒 Bloqueo por PIN Activado al iniciar la página."); } 
-  else { showToast("🔓 Bloqueo por PIN Desactivado."); }
-});
+const easterEggAlert = () => { alert("Uso exclusivamente estudiantil y sin fines de lucro. Se permite la copia y modificación, siempre que no medie comercialización"); };
+document.getElementById('footerGeminiBtn').addEventListener('click', easterEggAlert);
+if(document.getElementById('footerGeminiBtn2')) document.getElementById('footerGeminiBtn2').addEventListener('click', easterEggAlert);
 
 // ── IMPORTAR / EXPORTAR / BORRAR TODO ──
 function exportData() {
@@ -597,7 +741,7 @@ function deleteAllSubjects() {
   if(confirm("⚠️ ¿Estás seguro de que quieres borrar TODAS las materias?\n\nTe sugerimos usar el botón de 'Exportar' primero para guardar una copia de seguridad.\n¿Deseas continuar y vaciar la base de datos?")) {
       subjects = []; selected.clear(); saveData();
       renderManage(); renderSidebar(); renderGrid(); renderAutoSelection(); updateDatalist(); updateQuickParaleloSelect();
-      showToast("🗑️ Base de datos eliminada. Lista para importar.");
+      showToast("🗑️ Base de datos eliminada.");
   }
 }
 
@@ -738,11 +882,15 @@ function renderGrid() {
   gridContainer.innerHTML = '';
   
   let totalHours = 0; let totalGaps = 0;
-  const slotsByDay = { 'LUNES':[], 'MARTES':[], 'MIÉRCOLES':[], 'JUEVES':[], 'VIERNES':[] };
+  const activeDays = getActiveDays();
+  const slotsByDay = {}; activeDays.forEach(d => slotsByDay[d] = []);
+  
+  gridContainer.style.gridTemplateColumns = `60px repeat(${activeDays.length}, 1fr)`;
+  
   selectedSubjs.forEach(s => {
     (s.slots || []).forEach(sl => {
       totalHours += (Number(sl.end) - Number(sl.start));
-      slotsByDay[sl.day].push({ start: Number(sl.start), end: Number(sl.end) });
+      if(slotsByDay[sl.day]) slotsByDay[sl.day].push({ start: Number(sl.start), end: Number(sl.end) });
     });
   });
 
@@ -760,26 +908,37 @@ function renderGrid() {
   }
   
   const headCol = document.createElement('div'); headCol.className = 'grid-head hour-col'; gridContainer.appendChild(headCol);
-  DAYS.forEach(d => { 
+  activeDays.forEach(d => { 
       const h = document.createElement('div'); h.className = 'grid-head'; 
       h.innerHTML = `${d} <div class="day-hours-badge">${dailyHours[d]}h</div>`;
       gridContainer.appendChild(h); 
   });
   
   const hCol = document.createElement('div'); hCol.className = 'hour-col';
-  HOURS.forEach(h => { hCol.innerHTML += `<div class="hour-cell">${h}:00<br>-<br>${h+1}:00</div>`; });
+  for (let h = gStartH; h < gEndH; h++) { 
+      hCol.innerHTML += `<div class="hour-cell">${h}:00<br>-<br>${h+1}:00</div>`; 
+  }
   gridContainer.appendChild(hCol);
   
-  DAYS.forEach(day => {
+  activeDays.forEach(day => {
     const col = document.createElement('div'); col.className = 'grid-col';
     const dayCol = document.createElement('div'); dayCol.className = 'day-col';
-    HOURS.forEach((_,i) => dayCol.innerHTML += `<div class="day-stripe" style="top:${i*52}px;height:52px"></div>`);
+    dayCol.style.height = `calc(var(--grid-hour) * ${gEndH - gStartH})`;
+    
+    for (let i = 0; i < (gEndH - gStartH); i++) {
+        dayCol.innerHTML += `<div class="day-stripe" style="top:${i*52}px;height:52px"></div>`;
+    }
     
     selectedSubjs.forEach(s => {
       (s.slots || []).filter(sl => sl.day === day).forEach(sl => {
-        const top = (Number(sl.start) - HOURS_START) * 52 + 2;
-        const height = ((Number(sl.end) - Number(sl.start)) * 52) - 4;
+        if(sl.end <= gStartH || sl.start >= gEndH) return;
+        
+        const st = Math.max(sl.start, gStartH);
+        const en = Math.min(sl.end, gEndH);
+        const top = (st - gStartH) * 52 + 2;
+        const height = ((en - st) * 52) - 4;
         const noteHtml = s.note ? `<div class="block-note">${String(s.note || '')}</div>` : '';
+        
         dayCol.innerHTML += `<div class="block animate-fade" style="top:${top}px;height:${height}px;background:${s.color};border-left:4px solid rgba(0,0,0,0.2);">
             <div class="block-name">${String(s.name || '')}</div><div class="block-detail">${String(s.course || '')} | ${sl.start}:00–${sl.end}:00</div>${noteHtml}</div>`;
       });
@@ -800,10 +959,10 @@ function renderGrid() {
 function updateTimeLine() {
   document.querySelectorAll('.current-time-line').forEach(e => e.remove());
   const now = new Date(); const day = now.getDay(); 
-  if(day >= 1 && day <= 5) {
+  if(day >= 1 && day <= (gSat ? 6 : 5)) {
       const h = now.getHours(); const m = now.getMinutes();
-      if(h >= 7 && h < 20) {
-          const topPx = Math.round((h - 7) * 52 + (m / 60) * 52);
+      if(h >= gStartH && h < gEndH) {
+          const topPx = Math.round((h - gStartH) * 52 + (m / 60) * 52);
           const cols = document.querySelectorAll('#scheduleGrid .day-col');
           if(cols[day-1]) {
               const line = document.createElement('div'); line.className = 'current-time-line';
@@ -816,7 +975,7 @@ function updateTimeLine() {
 }
 setInterval(updateTimeLine, 60000);
 
-// ── REDISEÑO GESTIÓN DE MATERIAS (Categorización Homogénea) ──
+// ── REDISEÑO GESTIÓN DE MATERIAS ──
 function renderManage() {
   const container = document.getElementById('manageGrid');
   if(subjects.length === 0) { container.innerHTML = `<div style="grid-column:1/-1;">${getOnboardingHTML()}</div>`; return; }
@@ -836,6 +995,7 @@ function renderManage() {
       
       html += `
       <div class="manage-card animate-fade" style="animation-delay: ${idx * 0.05}s; display:flex; flex-direction:column; gap:12px;">
+          <button class="global-rm-btn" onclick="deleteEntireSubject('${name}')" title="Borrar toda la materia">🗑️</button>
           <div style="display:flex; align-items:center; gap:12px;">
               <div class="card-dot" style="background:${color}; width:18px; height:18px; border-radius:6px;"></div>
               <div style="flex:1;">
@@ -856,6 +1016,17 @@ function renderManage() {
   });
   
   container.innerHTML = html;
+}
+
+function deleteEntireSubject(targetName) {
+  if(confirm(`⚠️ ¿Borrar por completo la materia "${targetName}" y todos sus paralelos?`)) {
+    const idsToRemove = subjects.filter(s => String(s.name || '').trim() === targetName).map(s => String(s.id));
+    subjects = subjects.filter(s => String(s.name || '').trim() !== targetName);
+    idsToRemove.forEach(id => selected.delete(id));
+    saveData(); renderManage(); renderSidebar(); renderGrid(); updateQuickParaleloSelect();
+    if(document.getElementById('viewAuto').style.display === 'flex') renderAutoSelection();
+    showToast(`🗑️ ${targetName} eliminada`);
+  }
 }
 
 function renderAutoSelection() {
@@ -922,7 +1093,8 @@ function clearSelection() {
   selected.clear(); 
   document.getElementById('conflictAlert').classList.remove('show'); 
   document.getElementById('currentOptionLabel').textContent = '';
-  document.getElementById('quickParaleloSelect').value = '';
+  const sel = document.getElementById('quickParaleloSelect');
+  sel.value = ''; sel.selectedIndex = 0;
   saveData(); renderSidebar(); renderGrid(); 
 }
 
@@ -940,8 +1112,8 @@ function exportSchedule() {
 
 // ── AUTO-GENERADOR ──
 function calculateGaps(combo) {
-  let gaps = 0; const slotsByDay = { 'LUNES':[], 'MARTES':[], 'MIÉRCOLES':[], 'JUEVES':[], 'VIERNES':[] };
-  combo.forEach(s => (s.slots||[]).forEach(sl => slotsByDay[sl.day].push({ start: Number(sl.start), end: Number(sl.end) })));
+  let gaps = 0; const activeDays = getActiveDays(); const slotsByDay = {}; activeDays.forEach(d => slotsByDay[d] = []);
+  combo.forEach(s => (s.slots||[]).forEach(sl => { if(slotsByDay[sl.day]) slotsByDay[sl.day].push({ start: Number(sl.start), end: Number(sl.end) }) }));
   for (const day in slotsByDay) {
       const ds = slotsByDay[day].sort((a,b) => a.start - b.start);
       for(let i=0; i<ds.length-1; i++) {
@@ -1073,6 +1245,9 @@ function downloadHTMLCatalog() {
   if(!generatedCombinations.length) return;
   const expBg = isLightMode ? '#f8f9fa' : '#131314'; const expSurf = isLightMode ? '#ffffff' : '#1e1f20'; const expSurf2 = isLightMode ? '#f1f3f4' : '#282a2c'; const expBorder = isLightMode ? '#dadce0' : '#444746'; const expText = isLightMode ? '#202124' : '#e3e3e3'; const expAccent = isLightMode ? '#1a73e8' : '#e5c07b'; const expGridBg = isLightMode ? '#ffffff' : 'rgb(254, 249, 247)';
 
+  const activeDays = getActiveDays();
+  const activeHours = Array.from({length: gEndH - gStartH}, (_,i) => gStartH + i);
+
   let htmlContent = `
   <!DOCTYPE html>
   <html lang="es">
@@ -1084,16 +1259,15 @@ function downloadHTMLCatalog() {
       h1 { text-align: center; color: ${isLightMode ? '#1a73e8' : '#a8c7fa'}; margin-bottom: 40px; }
       .schedule-container { margin-bottom: 60px; background: ${expSurf}; padding: 20px; border-radius: 12px; border: 1px solid ${expBorder}; overflow-x: auto; }
       .schedule-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; color: ${expAccent}; }
-      .grid-wrap { display:grid; grid-template-columns:60px repeat(5,1fr); border:1px solid ${expBorder}; border-radius:12px; overflow:hidden; background:${expGridBg}; min-width: 700px; }
+      .grid-wrap { display:grid; grid-template-columns:60px repeat(${activeDays.length},1fr); border:1px solid ${expBorder}; border-radius:12px; overflow:hidden; background:${expGridBg}; min-width: 700px; }
       .grid-head { background:${expSurf2}; padding:12px 6px; text-align:center; font-size:12px; font-weight:bold; color:${isLightMode?'#5f6368':'#c4c7c5'}; text-transform:uppercase; border-bottom:1px solid ${expBorder}; }
       .grid-head:first-child { border-right:1px solid rgba(0,0,0,0.08); }
       .grid-col { position:relative; border-right:1px solid rgba(0,0,0,0.08); }
       .grid-col:last-child { border-right:none; }
       .hour-col { border-right:1px solid rgba(0,0,0,0.08); }
-      /* CSS estricto para evitar solapamientos por desbordamiento de fuente */
       .hour-cell { height:52px; max-height:52px; overflow:hidden; border-bottom:1px solid rgba(0,0,0,0.08); display:flex; align-items:center; justify-content:center; padding:0 4px; font-size:10px; color:#666; font-weight:bold; text-align:center; line-height:1.2; }
       .hour-cell:last-child { border-bottom:none; }
-      .day-col { position:relative; height:calc(52px * 13); }
+      .day-col { position:relative; height:calc(52px * ${activeHours.length}); }
       .day-stripe { position:absolute; left:0; right:0; border-bottom:1px solid rgba(0,0,0,0.08); }
       .block { position:absolute; left:4px; right:4px; border-radius:6px; padding:6px 8px; font-size:11px; overflow:hidden; border:1px solid rgba(0,0,0,0.1); box-shadow:0 2px 6px rgba(0,0,0,.3); color:#131314; display:flex; flex-direction:column; border-left:4px solid rgba(0,0,0,0.2);}
       .block-name { font-size:13px; font-weight:bold; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.1;}
@@ -1107,16 +1281,18 @@ function downloadHTMLCatalog() {
     const totalHours = combo.reduce((acc, s) => acc + (s.slots||[]).reduce((a,sl) => a + (Number(sl.end) - Number(sl.start)), 0), 0);
     const gaps = calculateGaps(combo);
     let gridHTML = `<div class="grid-head hour-col"></div>`;
-    DAYS.forEach(d => gridHTML += `<div class="grid-head">${d}</div>`);
+    activeDays.forEach(d => gridHTML += `<div class="grid-head">${d}</div>`);
     gridHTML += `<div class="hour-col">`;
-    HOURS.forEach(h => gridHTML += `<div class="hour-cell">${h}:00<br>-<br>${h+1}:00</div>`);
+    activeHours.forEach(h => gridHTML += `<div class="hour-cell">${h}:00<br>-<br>${h+1}:00</div>`);
     gridHTML += `</div>`;
-    DAYS.forEach(day => {
+    activeDays.forEach(day => {
       gridHTML += `<div class="grid-col"><div class="day-col">`;
-      HOURS.forEach((_,i) => gridHTML += `<div class="day-stripe" style="top:${i*52}px;height:52px"></div>`);
+      activeHours.forEach((_,i) => gridHTML += `<div class="day-stripe" style="top:${i*52}px;height:52px"></div>`);
       combo.forEach(s => {
         (s.slots||[]).filter(sl => sl.day === day).forEach(sl => {
-          const top = (Number(sl.start) - HOURS_START) * 52 + 2; const height = ((Number(sl.end) - Number(sl.start)) * 52) - 4;
+          if(sl.end <= gStartH || sl.start >= gEndH) return;
+          const st = Math.max(sl.start, gStartH); const en = Math.min(sl.end, gEndH);
+          const top = (st - gStartH) * 52 + 2; const height = ((en - st) * 52) - 4;
           gridHTML += `<div class="block" style="top:${top}px;height:${height}px;background:${s.color};border-left:4px solid rgba(0,0,0,0.2);"><div class="block-name">${String(s.name||'')}</div><div class="block-detail">${String(s.course||'')} | ${sl.start}:00–${sl.end}:00</div></div>`;
         });
       });
@@ -1129,12 +1305,11 @@ function downloadHTMLCatalog() {
   const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'Catalogo_Horarios.html'; link.click();
 }
 
-// ── MODAL LOGIC & ATAJOS BLINDADOS ──
+// ── MODAL LOGIC & EDITOR INMUTABLE ──
 document.addEventListener('keydown', e => {
     if(e.key === 'Escape' && document.getElementById('overlay').classList.contains('show')) closeModal();
 });
 
-// Auto-seleccionar color y semestre basado en materias existentes con el mismo nombre
 document.getElementById('fName').addEventListener('input', function(e) {
   const inputName = String(e.target.value || '').trim().toLowerCase();
   const existingSubject = subjects.find(s => String(s.name || '').trim().toLowerCase() === inputName);
@@ -1142,6 +1317,7 @@ document.getElementById('fName').addEventListener('input', function(e) {
       document.getElementById('fLevel').value = String(existingSubject.level || '').replace(/\D/g, ''); 
       chosenColor = existingSubject.color || COLORS[0];
       renderColorRow();
+      if(gMode === 'grid') buildInputGrid();
   }
 });
 
@@ -1149,7 +1325,7 @@ function editSubject(id) { openModal(String(id)); }
 
 function openModal(id) {
   if (id === 'undefined' || id === 'null' || typeof id === 'object') id = null;
-  editingId = id || null; slots = []; chosenColor = COLORS[0];
+  editingId = id || null; slots = []; chosenColor = COLORS[0]; activeGridCells.clear();
   updateDatalist(); 
   
   if(editingId) {
@@ -1173,30 +1349,54 @@ function openModal(id) {
     slots = [{day:'LUNES', start:7, end:8}];
     document.getElementById('btnModalDelete').style.display = 'none'; 
   }
-  renderColorRow(); renderSlots(); document.getElementById('overlay').classList.add('show');
+  renderColorRow(); 
+  
+  document.getElementById('lblModeIndicator').textContent = gMode === 'grid' ? '(Modo Cuadrícula)' : '(Modo Lista)';
+  document.getElementById('containerGridMode').style.display = gMode === 'grid' ? 'block' : 'none';
+  document.getElementById('containerListMode').style.display = gMode === 'list' ? 'block' : 'none';
+  
+  if (gMode === 'grid') { 
+      slots.forEach(sl => { for(let h = sl.start; h < sl.end; h++) activeGridCells.add(`${sl.day}-${h}`); }); 
+      buildInputGrid(); 
+  } 
+  else { renderSlots(slots); }
+
+  document.getElementById('overlay').classList.add('show');
 }
 function closeModal() { document.getElementById('overlay').classList.remove('show'); editingId = null; }
 
 function renderColorRow() { const row = document.getElementById('colorRow'); row.innerHTML = COLORS.map(c => `<div class="color-dot ${c===chosenColor?'selected':''}" style="background:${c}" onclick="selectColor('${c}')"></div>`).join(''); }
-function selectColor(c) { chosenColor = c; renderColorRow(); }
+function selectColor(c) { chosenColor = c; renderColorRow(); if(gMode === 'grid') buildInputGrid(); }
 
-function renderSlots() {
+function buildInputGrid() {
+  const activeDays = getActiveDays();
+  let html = '<tr><th>Hora</th>' + activeDays.map(d => `<th>${d.substring(0,3)}</th>`).join('') + '</tr>';
+  for(let h = 7; h <= 19; h++) { // Editor siempre abarca de 7 a 20 (el 19 representa 19:00 - 20:00)
+    html += `<tr><td class="time-lbl">${h}:00 - ${h+1}:00</td>`;
+    activeDays.forEach(d => {
+      const cellId = `${d}-${h}`; const isActive = activeGridCells.has(cellId);
+      html += `<td style="${isActive ? `background-color: ${chosenColor};` : ''}" class="${isActive?'active':''}" onclick="toggleGridCell('${cellId}')"></td>`;
+    });
+    html += '</tr>';
+  }
+  document.getElementById('inputGridTable').innerHTML = html;
+}
+function toggleGridCell(cellId) { activeGridCells.has(cellId) ? activeGridCells.delete(cellId) : activeGridCells.add(cellId); buildInputGrid(); }
+
+function renderSlots(slotsToRender) {
+  const activeDays = getActiveDays();
   const list = document.getElementById('slotList');
-  list.innerHTML = '';
-  slots.forEach((sl) => {
-    const div = document.createElement('div'); div.className = 'slot-row';
-    div.innerHTML = `<select class="s-day">${DAYS.map(d=>`<option ${sl.day===d?'selected':''}>${d}</option>`).join('')}</select><input type="number" min="7" max="19" class="s-start" value="${sl.start}" placeholder="Inicio"><input type="number" min="8" max="20" class="s-end" value="${sl.end}" placeholder="Fin"><button class="rm-btn" onclick="this.closest('.slot-row').remove()">✕</button>`;
-    list.appendChild(div);
-  });
+  list.innerHTML = (slotsToRender||[]).map(sl => `<div class="slot-row"><select class="s-day">${activeDays.map(d=>`<option ${sl.day===d?'selected':''}>${d}</option>`).join('')}</select><input type="number" min="7" max="19" class="s-start" value="${sl.start}" placeholder="Inicio"><input type="number" min="8" max="20" class="s-end" value="${sl.end}" placeholder="Fin"><button class="rm-btn" onclick="this.closest('.slot-row').remove()">✕</button></div>`).join('');
 }
 function addSlot() {
+  const activeDays = getActiveDays();
   const list = document.getElementById('slotList');
   const lastRow = list.lastElementChild;
   let defaultDay = 'LUNES';
   if (lastRow) { const sel = lastRow.querySelector('.s-day'); if (sel) defaultDay = sel.value; }
 
   const div = document.createElement('div'); div.className = 'slot-row animate-fade';
-  div.innerHTML = `<select class="s-day">${DAYS.map(d=>`<option ${d===defaultDay?'selected':''}>${d}</option>`).join('')}</select><input type="number" min="7" max="19" class="s-start" value="7" placeholder="Inicio"><input type="number" min="8" max="20" class="s-end" value="8" placeholder="Fin"><button class="rm-btn" onclick="this.closest('.slot-row').remove()">✕</button>`;
+  div.innerHTML = `<select class="s-day">${activeDays.map(d=>`<option ${d===defaultDay?'selected':''}>${d}</option>`).join('')}</select><input type="number" min="7" max="19" class="s-start" value="7" placeholder="Inicio"><input type="number" min="8" max="20" class="s-end" value="8" placeholder="Fin"><button class="rm-btn" onclick="this.closest('.slot-row').remove()">✕</button>`;
   list.appendChild(div);
 }
 
@@ -1215,25 +1415,32 @@ function saveSubject() {
       return;
   }
 
-  const currentSlots = [];
-  const slotRows = document.querySelectorAll('.slot-row');
-  let invalidTime = false; let internalConflict = false;
-  
-  slotRows.forEach(row => {
-    const d = row.querySelector('.s-day').value;
-    const st = parseInt(row.querySelector('.s-start').value, 10);
-    const en = parseInt(row.querySelector('.s-end').value, 10);
-    
-    if(isNaN(st) || isNaN(en) || st < 7 || en > 20 || st >= en) {
-        invalidTime = true;
-    } else {
-        currentSlots.forEach(existing => { if(existing.day === d && st < existing.end && en > existing.start) internalConflict = true; });
-        currentSlots.push({day: d, start: st, end: en});
-    }
-  });
+  let currentSlots = [];
+  if (gMode === 'grid') {
+    getActiveDays().forEach(day => {
+      let hoursActive = []; for(let h=7; h<=19; h++) { if(activeGridCells.has(`${day}-${h}`)) hoursActive.push(h); }
+      if(hoursActive.length === 0) return;
+      hoursActive.sort((a,b)=>a-b); let start = hoursActive[0], prev = hoursActive[0];
+      for(let i=1; i<hoursActive.length; i++) { if(hoursActive[i] === prev + 1) prev = hoursActive[i]; else { currentSlots.push({day: day, start: start, end: prev + 1}); start = hoursActive[i]; prev = hoursActive[i]; } }
+      currentSlots.push({day: day, start: start, end: prev + 1});
+    });
+  } else {
+      const slotRows = document.querySelectorAll('.slot-row');
+      let invalidTime = false; let internalConflict = false;
+      slotRows.forEach(row => {
+        const d = row.querySelector('.s-day').value;
+        const st = parseInt(row.querySelector('.s-start').value, 10);
+        const en = parseInt(row.querySelector('.s-end').value, 10);
+        if(isNaN(st) || isNaN(en) || st < 7 || en > 20 || st >= en) { invalidTime = true; } 
+        else {
+            currentSlots.forEach(existing => { if(existing.day === d && st < existing.end && en > existing.start) internalConflict = true; });
+            currentSlots.push({day: d, start: st, end: en});
+        }
+      });
+      if(invalidTime) { alert('⚠️ Hay horas inválidas. Asegúrate de usar formato 24h (7 a 20), sin decimales, y que la hora de inicio sea menor a la de fin.'); return; }
+      if(internalConflict) { alert('⚠️ Hay bloques de horas que se cruzan entre sí en este mismo paralelo. Corrige las horas.'); return; }
+  }
 
-  if(invalidTime) { alert('⚠️ Hay horas inválidas. Asegúrate de usar formato 24h (7 a 20), sin decimales, y que la hora de inicio sea menor a la de fin.'); return; }
-  if(internalConflict) { alert('⚠️ Hay bloques de horas que se cruzan entre sí en este mismo paralelo. Corrige las horas.'); return; }
   if(currentSlots.length === 0) { alert('Agrega al menos un bloque horario válido'); return; }
 
   const noteVal = String(document.getElementById('fNote').value || '').trim();
