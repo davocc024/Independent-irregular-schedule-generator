@@ -1,0 +1,16 @@
+{
+  "name": "TimeGrid Studio UCE",
+  "short_name": "TimeGrid UCE",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#131314",
+  "theme_color": "#131314",
+  "icons": [
+    {
+      "src": "./logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

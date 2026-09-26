@@ -6,22 +6,6 @@ function showToast(message) {
   setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
-function initPWA() {
-  const iconPath = 'logo.png';
-  const manifest = { name: "TimeGrid Studio", short_name: "Horarios", display: "standalone", start_url: location.href, background_color: "#131314", theme_color: "#a8c7fa", icons: [{ src: iconPath, sizes: "512x512", type: "image/png" }] };
-  const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
-  const linkManifest = document.createElement('link'); linkManifest.rel = 'manifest'; linkManifest.href = URL.createObjectURL(manifestBlob); document.head.appendChild(linkManifest);
-  const linkApple = document.createElement('link'); linkApple.rel = 'apple-touch-icon'; linkApple.href = iconPath; document.head.appendChild(linkApple);
-  const linkIcon = document.createElement('link'); linkIcon.rel = 'icon'; linkIcon.href = iconPath; document.head.appendChild(linkIcon);
-
-  if ('serviceWorker' in navigator) {
-    const swCode = `self.addEventListener('install', e => self.skipWaiting()); self.addEventListener('fetch', e => {});`;
-    const swBlob = new Blob([swCode], {type: 'application/javascript'});
-    navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
-  }
-}
-initPWA();
-
 const THEME_KEY = 'horario_theme';
 let isLightMode = localStorage.getItem(THEME_KEY) === 'light';
 function updateThemeIcon() { document.getElementById('themeIcon').textContent = isLightMode ? '🌙' : '☀️'; }
