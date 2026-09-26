@@ -7,10 +7,10 @@
   "theme_color": "#131314",
   "icons": [
     {
-      "src": "./timegrid-icon.png",
+      "src": "./logo.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
   ]
 }
