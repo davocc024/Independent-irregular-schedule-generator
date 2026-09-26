@@ -965,3 +965,5 @@ document.getElementById('overlay').addEventListener('click', e => { if(e.target 
 loadData(); renderSidebar(); renderGrid(); updateDatalist(); updateQuickParaleloSelect();
 
 if(window.innerWidth <= 768 && document.getElementById('viewManage').style.display !== 'flex') document.getElementById('mobileMenuBtn').style.display = 'block';
+
+// TimeGrid source privado
