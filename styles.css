@@ -1,3 +1,13 @@
+/*!
+ * TimeGrid
+ * Independent Irregular Schedule Generator
+ *
+ * Copyright © 2026 David Catucuamba
+ *
+ * Original project created and developed by David Catucuamba.
+ * See LICENSE for terms of use.
+ */
+
 :root {
   --bg: #131314;
   --bg-glow: radial-gradient(circle at 50% 0%, #1e2233 0%, #131314 60%, #131314 100%);
