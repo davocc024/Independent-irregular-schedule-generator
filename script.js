@@ -1,4 +1,3 @@
-// ── TOAST NOTIFICATIONS ──
 function showToast(message) {
   const container = document.getElementById('toastContainer');
   const toast = document.createElement('div');
@@ -7,7 +6,6 @@ function showToast(message) {
   setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
-// ── PWA: MANIFEST CON IMAGEN PNG ──
 function initPWA() {
   const iconPath = 'logo.png';
   const manifest = { name: "TimeGrid Studio", short_name: "Horarios", display: "standalone", start_url: location.href, background_color: "#131314", theme_color: "#a8c7fa", icons: [{ src: iconPath, sizes: "512x512", type: "image/png" }] };
@@ -24,7 +22,6 @@ function initPWA() {
 }
 initPWA();
 
-// ── CONFIGURACION TEMA Y PALETA ──
 const THEME_KEY = 'horario_theme';
 let isLightMode = localStorage.getItem(THEME_KEY) === 'light';
 function updateThemeIcon() { document.getElementById('themeIcon').textContent = isLightMode ? '🌙' : '☀️'; }
@@ -37,7 +34,6 @@ function toggleTheme() {
   updateThemeIcon();
 }
 
-// ── VARIABLES GLOBALES Y AJUSTES (V2) ──
 let gMode = localStorage.getItem('h_mode') || 'list';
 let gSat = localStorage.getItem('h_sat') === 'true';
 let gStartH = parseInt(localStorage.getItem('h_start')) || 7;
@@ -84,7 +80,6 @@ function saveSettings() {
 const DB_KEY = 'horario_materias_db';
 const SEL_KEY = 'horario_materias_seleccionadas';
 
-/* COLORES DE LA PALETA */
 const COLORS = ['#a8c7fa','#e5c07b','#81c995','#fde293','#f28b82','#78d9ec','#fcaded','#a8dab5','#fcb97d','#8ab4f8', '#b39ddb', '#ffcc80', '#80cbc4'];
 
 let subjects = [];
@@ -95,33 +90,26 @@ let activeGridCells = new Set();
 let generatedCombinations = [];
 let unselectedAutoFilters = new Set(); 
 
-// ── LÓGICA DE LOGIN (OFUSCADO) ──
 const TARGET_HASH = "MzY1Mg=="; // 3652
 const pinInputs = document.querySelectorAll('.pin-input');
 const loginScreen = document.getElementById('loginScreen');
 const loginError = document.getElementById('loginError');
 
-// ── ANIMACIÓN DE CARGA Y VERIFICACIÓN DE PIN ──
 window.addEventListener('load', () => {
   const splash = document.getElementById('splashScreen');
   const loginScreen = document.getElementById('loginScreen');
   
-  // Tiempo de exhibición de la pantalla de carga (1.8 segundos)
   setTimeout(() => {
     if (splash) splash.style.opacity = '0';
     
-    // Esperamos a que termine el fade out (0.6s)
     setTimeout(() => {
       if (splash) splash.style.display = 'none';
       
-      // Si el PIN está activado, mostramos la pantalla de login
       if (gPin && loginScreen) { 
         loginScreen.style.display = 'flex'; 
-        // Forzamos un reflow para que la animación de entrada (si la hubiera) funcione
         loginScreen.offsetHeight; 
         loginScreen.style.opacity = '1';
         
-        // Auto-focus en el primer input si existe
         const firstPinInput = document.querySelector('.pin-input');
         if(firstPinInput) firstPinInput.focus();
       }
@@ -161,7 +149,6 @@ const easterEggAlert = () => { alert("Uso exclusivamente estudiantil y sin fines
 document.getElementById('footerGeminiBtn').addEventListener('click', easterEggAlert);
 if(document.getElementById('footerGeminiBtn2')) document.getElementById('footerGeminiBtn2').addEventListener('click', easterEggAlert);
 
-// ── IMPORTAR / EXPORTAR / BORRAR TODO ──
 function exportData() {
   if (subjects.length === 0) { alert("No hay materias para exportar."); return; }
   const defaultName = "materias_respaldo.json";
@@ -210,7 +197,6 @@ function deleteAllSubjects() {
   }
 }
 
-// ── FUNCIONES DE TABLERO Y DATOS ──
 function loadData() {
   const storedDB = localStorage.getItem(DB_KEY);
   if(storedDB) { subjects = JSON.parse(storedDB); } else { subjects = []; }
@@ -440,7 +426,6 @@ function updateTimeLine() {
 }
 setInterval(updateTimeLine, 60000);
 
-// ── REDISEÑO GESTIÓN DE MATERIAS ──
 function renderManage() {
   const container = document.getElementById('manageGrid');
   if(subjects.length === 0) { container.innerHTML = `<div style="grid-column:1/-1;">${getOnboardingHTML()}</div>`; return; }
@@ -568,20 +553,16 @@ function exportSchedule() {
   
   const grid = document.getElementById('scheduleGrid');
   
-  // Ocultar linea de tiempo
   document.querySelectorAll('.current-time-line').forEach(e => e.style.display = 'none'); 
 
-  // Forzar modo claro temporalmente para la exportación de PNG
   const currentTheme = document.documentElement.getAttribute('data-theme');
   document.documentElement.setAttribute('data-theme', 'light');
 
-  // Pequeño retardo para asegurar que los estilos apliquen antes de capturar
   setTimeout(() => {
     html2canvas(grid, { 
-      backgroundColor: '#ffffff', // Fondo claro garantizado
+      backgroundColor: '#ffffff', // Fondo claro
       scale: 2 
     }).then(canvas => {
-      // Restaurar tema y lineas de tiempo
       document.documentElement.setAttribute('data-theme', currentTheme);
       document.querySelectorAll('.current-time-line').forEach(e => e.style.display = 'block');
       
@@ -605,7 +586,6 @@ function exportSchedule() {
   }, 100);
 }
 
-// ── AUTO-GENERADOR ──
 function calculateGaps(combo) {
   let gaps = 0; const activeDays = getActiveDays(); const slotsByDay = {}; activeDays.forEach(d => slotsByDay[d] = []);
   combo.forEach(s => (s.slots||[]).forEach(sl => { if(slotsByDay[sl.day]) slotsByDay[sl.day].push({ start: Number(sl.start), end: Number(sl.end) }) }));
@@ -800,7 +780,6 @@ function downloadHTMLCatalog() {
   const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'Catalogo_Horarios.html'; link.click();
 }
 
-// ── MODAL LOGIC & EDITOR INMUTABLE ──
 document.addEventListener('keydown', e => {
     if(e.key === 'Escape' && document.getElementById('overlay').classList.contains('show')) closeModal();
 });
@@ -866,7 +845,7 @@ function selectColor(c) { chosenColor = c; renderColorRow(); if(gMode === 'grid'
 function buildInputGrid() {
   const activeDays = getActiveDays();
   let html = '<tr><th>Hora</th>' + activeDays.map(d => `<th>${d.substring(0,3)}</th>`).join('') + '</tr>';
-  for(let h = 7; h <= 19; h++) { // Editor siempre abarca de 7 a 20 (el 19 representa 19:00 - 20:00)
+  for(let h = 7; h <= 19; h++) { 
     html += `<tr><td class="time-lbl">${h}:00 - ${h+1}:00</td>`;
     activeDays.forEach(d => {
       const cellId = `${d}-${h}`; const isActive = activeGridCells.has(cellId);
@@ -999,7 +978,6 @@ window.addEventListener('resize', () => {
 
 document.getElementById('overlay').addEventListener('click', e => { if(e.target === document.getElementById('overlay')) closeModal(); });
 
-// Inicialización
 loadData(); renderSidebar(); renderGrid(); updateDatalist(); updateQuickParaleloSelect();
 
 if(window.innerWidth <= 768 && document.getElementById('viewManage').style.display !== 'flex') document.getElementById('mobileMenuBtn').style.display = 'block';
