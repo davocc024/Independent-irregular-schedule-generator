@@ -7,14 +7,25 @@ function showToast(message) {
   setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
-// ── PWA: MANIFEST CON IMAGEN PNG ──
+// ── PWA: GENERADOR DE LOGO Y SERVICE WORKER DINÁMICO ──
 function initPWA() {
-  const iconPath = 'logo.png';
-  const manifest = { name: "TimeGrid Studio", short_name: "Horarios", display: "standalone", start_url: location.href, background_color: "#131314", theme_color: "#a8c7fa", icons: [{ src: iconPath, sizes: "512x512", type: "image/png" }] };
+  const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#1e1f20'; ctx.beginPath(); ctx.roundRect(0, 0, 512, 512, 80); ctx.fill();
+  ctx.strokeStyle = '#e5c07b'; ctx.lineWidth = 24; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(100, 80); ctx.lineTo(412, 80); ctx.lineTo(412, 380); ctx.quadraticCurveTo(256, 500, 100, 380); ctx.closePath(); ctx.stroke();
+  ctx.strokeStyle = '#a8c7fa'; ctx.lineWidth = 14;
+  for(let i=1; i<3; i++) { const x = 100 + (312/3) * i; ctx.beginPath(); ctx.moveTo(x, 100); ctx.lineTo(x, 400); ctx.stroke(); }
+  for(let i=1; i<4; i++) { const y = 80 + (320/5) * i; ctx.beginPath(); ctx.moveTo(110, y); ctx.lineTo(402, y); ctx.stroke(); }
+  ctx.strokeStyle = '#e5c07b'; ctx.lineWidth = 36;
+  ctx.beginPath(); ctx.moveTo(180, 260); ctx.lineTo(260, 340); ctx.lineTo(380, 160); ctx.stroke();
+  
+  const iconBase64 = canvas.toDataURL('image/png');
+  const manifest = { name: "Crea Horarios UCE", short_name: "Horarios", display: "standalone", start_url: location.href, background_color: "#131314", theme_color: "#a8c7fa", icons: [{ src: iconBase64, sizes: "512x512", type: "image/png" }] };
   const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
   const linkManifest = document.createElement('link'); linkManifest.rel = 'manifest'; linkManifest.href = URL.createObjectURL(manifestBlob); document.head.appendChild(linkManifest);
-  const linkApple = document.createElement('link'); linkApple.rel = 'apple-touch-icon'; linkApple.href = iconPath; document.head.appendChild(linkApple);
-  const linkIcon = document.createElement('link'); linkIcon.rel = 'icon'; linkIcon.href = iconPath; document.head.appendChild(linkIcon);
+  const linkApple = document.createElement('link'); linkApple.rel = 'apple-touch-icon'; linkApple.href = iconBase64; document.head.appendChild(linkApple);
+  const linkIcon = document.createElement('link'); linkIcon.rel = 'icon'; linkIcon.href = iconBase64; document.head.appendChild(linkIcon);
 
   if ('serviceWorker' in navigator) {
     const swCode = `self.addEventListener('install', e => self.skipWaiting()); self.addEventListener('fetch', e => {});`;
@@ -42,7 +53,7 @@ let gMode = localStorage.getItem('h_mode') || 'list';
 let gSat = localStorage.getItem('h_sat') === 'true';
 let gStartH = parseInt(localStorage.getItem('h_start')) || 7;
 let gEndH = parseInt(localStorage.getItem('h_end')) || 20;
-let gPin = localStorage.getItem('horario_pin_enabled') === 'true';
+let gPin = localStorage.getItem('horario_pin_enabled') === null ? true : localStorage.getItem('horario_pin_enabled') === 'true';
 
 function getActiveDays() { return gSat ? ['LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES','SÁBADO'] : ['LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES']; }
 
@@ -101,33 +112,7 @@ const pinInputs = document.querySelectorAll('.pin-input');
 const loginScreen = document.getElementById('loginScreen');
 const loginError = document.getElementById('loginError');
 
-// ── ANIMACIÓN DE CARGA Y VERIFICACIÓN DE PIN ──
-window.addEventListener('load', () => {
-  const splash = document.getElementById('splashScreen');
-  const loginScreen = document.getElementById('loginScreen');
-  
-  // Tiempo de exhibición de la pantalla de carga (1.8 segundos)
-  setTimeout(() => {
-    if (splash) splash.style.opacity = '0';
-    
-    // Esperamos a que termine el fade out (0.6s)
-    setTimeout(() => {
-      if (splash) splash.style.display = 'none';
-      
-      // Si el PIN está activado, mostramos la pantalla de login
-      if (gPin && loginScreen) { 
-        loginScreen.style.display = 'flex'; 
-        // Forzamos un reflow para que la animación de entrada (si la hubiera) funcione
-        loginScreen.offsetHeight; 
-        loginScreen.style.opacity = '1';
-        
-        // Auto-focus en el primer input si existe
-        const firstPinInput = document.querySelector('.pin-input');
-        if(firstPinInput) firstPinInput.focus();
-      }
-    }, 600); 
-  }, 1800); 
-});
+if (!gPin) { loginScreen.style.display = 'none'; }
 
 pinInputs.forEach((input, index) => {
   input.addEventListener('input', (e) => {
@@ -164,7 +149,7 @@ if(document.getElementById('footerGeminiBtn2')) document.getElementById('footerG
 // ── IMPORTAR / EXPORTAR / BORRAR TODO ──
 function exportData() {
   if (subjects.length === 0) { alert("No hay materias para exportar."); return; }
-  const defaultName = "materias_respaldo.json";
+  const defaultName = "materias_uce.json";
   let fileName = prompt("Ingresa el nombre del archivo de respaldo:", defaultName);
   if (fileName === null) return; 
   if (!fileName.trim()) fileName = defaultName;
