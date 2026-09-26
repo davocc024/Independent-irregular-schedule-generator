@@ -1,3 +1,13 @@
+/*!
+ * TimeGrid
+ * Independent Irregular Schedule Generator
+ *
+ * Copyright © 2026 David Catucuamba
+ *
+ * Original project created and developed by David Catucuamba.
+ * See LICENSE for terms of use.
+ */
+
 function showToast(message) {
   const container = document.getElementById('toastContainer');
   const toast = document.createElement('div');
