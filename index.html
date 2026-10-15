@@ -2,9 +2,9 @@
   TimeGrid
   Independent Irregular Schedule Generator
 
-  Copyright © 2026 David Catucuamba
+  Copyright © 2026 Eddy Catucuamba
 
-  Original project created and developed by David Catucuamba.
+  Original project created and developed by Eddy Catucuamba.
   See LICENSE for terms of use.
 -->
 
@@ -202,9 +202,20 @@
       <input id="fNote" type="text" placeholder="Ej: Dra. Fukalova / D3-1">
     </div>
 
-    <div class="form-group" style="display:flex; align-items:center; gap:10px; margin-top: 10px; margin-bottom: 24px;">
+    <div class="form-group mandatory-field-group" id="mandatoryFieldGroup" style="display:none; align-items:center; gap:10px; margin-top: 10px; margin-bottom: 24px;">
       <input type="checkbox" id="fMandatory" style="width:20px; height:20px; accent-color:var(--danger); cursor:pointer;">
       <label for="fMandatory" style="margin:0; color:var(--danger); font-weight:700; font-size:0.85rem; cursor:pointer;">Materia Obligatoria (Repetición / Arrastre)</label>
+    </div>
+
+    <div class="advanced-parallel-setting" id="advancedParallelSetting" style="display:none;">
+      <div class="advanced-parallel-setting-copy">
+        <div class="settings-label">Paralelo priorizado</div>
+        <div class="settings-desc">En modo priorizado, este paralelo será favorecido frente a los demás de la misma materia.</div>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="fExtraPriority">
+        <span class="slider"></span>
+      </label>
     </div>
 
     <div class="form-group">
@@ -288,6 +299,28 @@
       </label>
     </div>
 
+    <div class="settings-row">
+      <div>
+        <div class="settings-label">Modo Priorizado</div>
+        <div class="settings-desc">Permite marcar un paralelo como preferente y habilita la generación avanzada.</div>
+      </div>
+      <label class="toggle-switch toggle-priorizado">
+        <input type="checkbox" id="setAdvancedPriority">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div id="advancedPriorityManager" class="advanced-priority-manager">
+      <div class="advanced-priority-header">
+        <div>
+          <div class="settings-label">Paralelos priorizados</div>
+          <div class="settings-desc">Consulta y quita rápidamente las preferencias de segundo nivel.</div>
+        </div>
+        <span id="advancedPriorityCount" class="advanced-priority-count">0</span>
+      </div>
+      <div id="advancedPriorityList" class="advanced-priority-list"></div>
+    </div>
+
     <div class="settings-row" style="margin-top: 32px; border-top: 1px solid rgba(242, 139, 130, 0.3); padding-top: 24px;">
       <div>
         <div class="settings-label" style="color: var(--danger);">Zona de Peligro</div>
@@ -298,6 +331,30 @@
 
     <div class="modal-actions" style="margin-top: 32px;">
       <button class="btn primary" onclick="saveSettings()" style="width: 100%;">Aplicar y Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay generation-choice-overlay" id="generationChoiceOverlay">
+  <div class="modal generation-choice-modal">
+    <div class="generation-choice-title">Generar horario ⚡</div>
+    <div class="generation-choice-subtitle">Selecciona el criterio.</div>
+    <div class="generation-choice-line"></div>
+
+    <div class="generation-choice-row">
+      <div class="generation-choice-copy">
+        <div class="generation-choice-name">NORMAL</div>
+        <div class="generation-choice-desc">Generación habitual, sin usar paralelos priorizados.</div>
+      </div>
+      <button type="button" class="generation-choice-btn normal" onclick="chooseGenerationMode('normal')">GENERAR</button>
+    </div>
+
+    <div class="generation-choice-row">
+      <div class="generation-choice-copy">
+        <div class="generation-choice-name">PRIORIDAD AVANZADA</div>
+        <div class="generation-choice-desc">Favorece los paralelos marcados como priorizados.</div>
+      </div>
+      <button type="button" class="generation-choice-btn advanced" onclick="chooseGenerationMode('advanced')">GENERAR</button>
     </div>
   </div>
 </div>

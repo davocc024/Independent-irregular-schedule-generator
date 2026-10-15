@@ -2,9 +2,9 @@
  * TimeGrid
  * Independent Irregular Schedule Generator
  *
- * Copyright © 2026 David Catucuamba
+ * Copyright © 2026 Eddy Catucuamba
  *
- * Original project created and developed by David Catucuamba.
+ * Original project created and developed by Eddy Catucuamba.
  * See LICENSE for terms of use.
  */
 
@@ -33,8 +33,20 @@ let gSat = localStorage.getItem('h_sat') === 'true';
 let gStartH = parseInt(localStorage.getItem('h_start')) || 7;
 let gEndH = parseInt(localStorage.getItem('h_end')) || 20;
 let gPin = localStorage.getItem('horario_pin_enabled') === 'true';
+let gAdvancedPriority = localStorage.getItem('h_advanced_priority') === 'true';
+let pendingGenerationMode = null;
 
 function getActiveDays() { return gSat ? ['LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES','SÁBADO'] : ['LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES']; }
+
+function resetAutoResults() {
+  generatedCombinations = [];
+  const resultsDiv = document.getElementById('autoResults');
+  if(resultsDiv) resultsDiv.innerHTML = '<p style="color:var(--muted); font-size:0.9rem;">Selecciona tus materias y presiona "Generar".</p>';
+  const scriptBtn = document.getElementById('btnFullScript');
+  const catalogBtn = document.getElementById('btnFullCatalog');
+  if(scriptBtn) scriptBtn.style.display = 'none';
+  if(catalogBtn) catalogBtn.style.display = 'none';
+}
 
 function openSettings() {
   document.getElementById('setMode').value = gMode;
@@ -42,6 +54,9 @@ function openSettings() {
   document.getElementById('setStartH').value = gStartH;
   document.getElementById('setEndH').value = gEndH;
   document.getElementById('setPin').checked = gPin;
+  const advancedToggle = document.getElementById('setAdvancedPriority');
+  if(advancedToggle) advancedToggle.checked = gAdvancedPriority;
+  renderAdvancedPriorityManager();
   document.getElementById('settingsOverlay').classList.add('show');
 }
 
@@ -58,17 +73,21 @@ function saveSettings() {
   gSat = document.getElementById('setSat').checked;
   gStartH = s; gEndH = e;
   gPin = document.getElementById('setPin').checked;
+  const advancedToggle = document.getElementById('setAdvancedPriority');
+  gAdvancedPriority = advancedToggle ? advancedToggle.checked : false;
   
   localStorage.setItem('h_mode', gMode);
   localStorage.setItem('h_sat', gSat);
   localStorage.setItem('h_start', gStartH);
   localStorage.setItem('h_end', gEndH);
   localStorage.setItem('horario_pin_enabled', gPin);
+  localStorage.setItem('h_advanced_priority', gAdvancedPriority);
   
   closeSettings();
-  renderGrid(); renderManage(); renderSidebar(); 
+  resetAutoResults();
+  renderGrid(); renderManage(); renderSidebar(); renderAdvancedPriorityManager(); 
   if(document.getElementById('viewAuto').style.display === 'flex') renderAutoSelection();
-  showToast("⚙️ Ajustes globales aplicados");
+  showToast(gAdvancedPriority ? "⚙️ Modo PRIORIZADO activado" : "⚙️ Modo NORMAL activado");
 }
 
 const DB_KEY = 'horario_materias_db';
@@ -168,12 +187,17 @@ function importData(event) {
         let maxId = subjects.length > 0 ? Math.max(...subjects.map(s => s.id)) : 0;
         let agregadas = 0;
         imported.forEach(impSubj => {
-           const isDuplicate = subjects.some(s => String(s.name || '').trim().toLowerCase() === String(impSubj.name || '').trim().toLowerCase() && String(s.course || '') === String(impSubj.course || ''));
+           impSubj.isMandatory = impSubj.isMandatory === true || impSubj.isPriority === true;
+           impSubj.isExtraPriority = impSubj.isExtraPriority === true;
+           delete impSubj.isPriority;
+           if(impSubj.isExtraPriority) impSubj.isMandatory = true;
+           const isDuplicate = subjects.some(s => normalizeSubjectName(s.name) === normalizeSubjectName(impSubj.name) && String(s.course || '') === String(impSubj.course || ''));
            if(!isDuplicate) {
                maxId++; impSubj.id = maxId; subjects.push(impSubj); agregadas++;
            }
         });
-        saveData(); renderManage(); renderSidebar(); renderGrid(); updateDatalist(); updateQuickParaleloSelect();
+        normalizePriorityState();
+        saveData(); renderManage(); renderSidebar(); renderGrid(); renderAutoSelection(); renderAdvancedPriorityManager(); updateDatalist(); updateQuickParaleloSelect();
         showToast(`✅ Importación exitosa: Se agregaron ${agregadas} materias.`);
       } else { throw new Error("Formato inválido"); }
     } catch(err) { alert("❌ Error al leer el archivo .json."); }
@@ -194,6 +218,16 @@ function deleteAllSubjects() {
 function loadData() {
   const storedDB = localStorage.getItem(DB_KEY);
   if(storedDB) { subjects = JSON.parse(storedDB); } else { subjects = []; }
+
+  subjects = Array.isArray(subjects) ? subjects.map(s => {
+    const normalized = { ...s };
+    normalized.isMandatory = normalized.isMandatory === true || normalized.isPriority === true;
+    normalized.isExtraPriority = normalized.isExtraPriority === true;
+    delete normalized.isPriority;
+    if(normalized.isExtraPriority) normalized.isMandatory = true;
+    return normalized;
+  }) : [];
+  normalizePriorityState();
   
   const storedSel = localStorage.getItem(SEL_KEY);
   if(storedSel) {
@@ -206,6 +240,115 @@ function loadData() {
 function saveData() {
   localStorage.setItem(DB_KEY, JSON.stringify(subjects));
   localStorage.setItem(SEL_KEY, JSON.stringify(Array.from(selected)));
+}
+
+function normalizeSubjectName(name) {
+  return String(name || '').trim().toLowerCase();
+}
+
+function normalizePriorityState() {
+  const mandatoryNames = new Set(
+    subjects.filter(s => s.isMandatory === true).map(s => normalizeSubjectName(s.name))
+  );
+  subjects.forEach(s => {
+    const key = normalizeSubjectName(s.name);
+    if(mandatoryNames.has(key)) s.isMandatory = true;
+    if(s.isExtraPriority === true) s.isMandatory = true;
+  });
+}
+
+function isSubjectMandatory(name) {
+  const key = normalizeSubjectName(name);
+  return subjects.some(s => normalizeSubjectName(s.name) === key && s.isMandatory === true);
+}
+
+function setSubjectMandatory(name, active) {
+  const key = normalizeSubjectName(name);
+  const hadExtra = subjects.some(s => normalizeSubjectName(s.name) === key && s.isExtraPriority === true);
+  subjects.forEach(s => {
+    if(normalizeSubjectName(s.name) === key) {
+      s.isMandatory = !!active;
+      if(!active) s.isExtraPriority = false;
+    }
+  });
+  saveData();
+  renderManage(); renderSidebar(); renderGrid(); renderAutoSelection(); renderAdvancedPriorityManager();
+  if(active) {
+    showToast(`📌 ${String(name || '').trim()} marcada como OBLIGATORIA`);
+  } else if(hadExtra) {
+    showToast(`📎 ${String(name || '').trim()} volvió a estado normal; se quitaron sus paralelos priorizados`);
+  } else {
+    showToast(`📎 ${String(name || '').trim()} volvió a estado normal`);
+  }
+}
+
+function toggleSubjectMandatory(name, event) {
+  if(event) event.stopPropagation();
+  setSubjectMandatory(name, !isSubjectMandatory(name));
+}
+
+function hasExtraPriority() {
+  return subjects.some(s => s.isExtraPriority === true);
+}
+
+function getExtraPrioritySubjects() {
+  return subjects.filter(s => s.isExtraPriority === true).sort((a,b) => {
+    const na = normalizeSubjectName(a.name);
+    const nb = normalizeSubjectName(b.name);
+    if(na !== nb) return na.localeCompare(nb);
+    return String(a.course || '').localeCompare(String(b.course || ''), undefined, {numeric:true});
+  });
+}
+
+function removeExtraPriority(id) {
+  const subject = subjects.find(s => String(s.id) === String(id));
+  if(!subject) return;
+  subject.isExtraPriority = false;
+  saveData();
+  renderAdvancedPriorityManager(); renderManage(); renderSidebar(); renderAutoSelection();
+  showToast(`📎 ${String(subject.name || '')} ${String(subject.course || '')} volvió a estado normal`);
+}
+
+function renderAdvancedPriorityManager() {
+  const manager = document.getElementById('advancedPriorityManager');
+  const count = document.getElementById('advancedPriorityCount');
+  const list = document.getElementById('advancedPriorityList');
+  if(!manager || !count || !list) return;
+
+  manager.classList.toggle('show', gAdvancedPriority);
+  if(!gAdvancedPriority) {
+    count.textContent = '0';
+    list.innerHTML = '';
+    return;
+  }
+
+  const extras = getExtraPrioritySubjects();
+  count.textContent = String(extras.length);
+  list.innerHTML = extras.length ? extras.map(s => `
+    <div class="advanced-priority-item">
+      <div class="advanced-priority-item-info">
+        <div class="advanced-priority-item-name">${String(s.name || '')}</div>
+        <div class="advanced-priority-item-meta">${String(s.level || '')} · <strong class="advanced-priority-course">${String(s.course || '')}</strong>${s.note ? ` · ${String(s.note)}` : ''}</div>
+      </div>
+      <button type="button" class="advanced-priority-remove" onclick="removeExtraPriority('${String(s.id)}')">Quitar</button>
+    </div>
+  `).join('') : '<div class="advanced-priority-empty">No hay paralelos priorizados.</div>';
+}
+
+function openPriorityGenerationMenu() {
+  const overlay = document.getElementById('generationChoiceOverlay');
+  if(overlay) overlay.classList.add('show');
+}
+
+function closePriorityGenerationMenu() {
+  const overlay = document.getElementById('generationChoiceOverlay');
+  if(overlay) overlay.classList.remove('show');
+  pendingGenerationMode = null;
+}
+
+function chooseGenerationMode(mode) {
+  closePriorityGenerationMenu();
+  runAutoGeneration(mode === 'advanced' ? 'advanced' : 'normal');
 }
 
 function getNextId() { return subjects.length === 0 ? 1 : Math.max(...subjects.map(s => s.id)) + 1; }
@@ -422,43 +565,52 @@ setInterval(updateTimeLine, 60000);
 
 function renderManage() {
   const container = document.getElementById('manageGrid');
-  if(subjects.length === 0) { container.innerHTML = `<div style="grid-column:1/-1;">${getOnboardingHTML()}</div>`; return; }
-  
+  if(subjects.length === 0) {
+    container.innerHTML = `<div style="grid-column:1/-1;">${getOnboardingHTML()}</div>`;
+    return;
+  }
+
   const groupedByName = {};
   subjects.forEach(s => {
-      const key = String(s.name || '').trim();
-      if(!groupedByName[key]) groupedByName[key] = [];
-      groupedByName[key].push(s);
+    const key = String(s.name || '').trim();
+    if(!groupedByName[key]) groupedByName[key] = [];
+    groupedByName[key].push(s);
   });
 
   let html = '';
   Object.entries(groupedByName).sort((a,b) => a[0].localeCompare(b[0])).forEach(([name, list], idx) => {
-      const level = String(list[0].level || '');
-      const color = list[0].color || COLORS[0];
-      const hasMandatory = list.some(s => s.isMandatory);
-      
-      html += `
-      <div class="manage-card animate-fade" style="animation-delay: ${idx * 0.05}s; display:flex; flex-direction:column; gap:12px;">
-          <button class="global-rm-btn" onclick="deleteEntireSubject('${name}')" title="Borrar toda la materia">🗑️</button>
-          <div style="display:flex; align-items:center; gap:12px;">
-              <div class="card-dot" style="background:${color}; width:18px; height:18px; border-radius:6px;"></div>
-              <div style="flex:1;">
-                  <div class="card-name" style="font-size:1.05rem; font-weight:800;">${name}</div>
-                  <div class="card-level" style="margin-top:2px;">
-                      ${hasMandatory ? `<span style="background:var(--danger); color:#fff; font-size:0.6rem; padding:2px 6px; border-radius:4px; font-weight:800; margin-right:6px;">OBLIGATORIO</span>` : ''}
-                      ${level}
-                  </div>
-              </div>
+    const level = String(list[0].level || '');
+    const color = list[0].color || COLORS[0];
+    const hasMandatory = list.some(s => s.isMandatory === true);
+    const encodedName = encodeURIComponent(name);
+
+    html += `
+      <div class="manage-card animate-fade" style="animation-delay: ${idx * 0.05}s;">
+        <div class="manage-card-actions">
+          <button type="button" class="global-rm-btn" onclick="deleteEntireSubject(decodeURIComponent('${encodedName}')); event.stopPropagation();" title="Borrar toda la materia">🗑️</button>
+          <button type="button" class="subject-priority-toggle ${hasMandatory ? 'active' : ''}" onclick="toggleSubjectMandatory(decodeURIComponent('${encodedName}'), event)" title="${hasMandatory ? 'Quitar OBLIGATORIO' : 'Marcar como OBLIGATORIO'}">${hasMandatory ? '📌' : '📎'}</button>
+        </div>
+
+        <div class="manage-card-header">
+          <div class="card-dot" style="background:${color};" aria-hidden="true"></div>
+          <div class="manage-card-title-wrap">
+            <div class="card-name">${name}</div>
+            <div class="card-level">
+              ${hasMandatory ? `<span class="mandatory-badge">OBLIGATORIO</span>` : ''}
+              ${level}
+            </div>
           </div>
-          <div style="font-size:0.75rem; color:var(--muted); font-weight:700; margin-top:4px;">PARALELOS DISPONIBLES:</div>
-          <div style="display:flex; gap:8px; flex-wrap:wrap;">
-              ${list.sort((a,b) => String(a.course||'').localeCompare(String(b.course||''))).map(s => `
-                  <button type="button" class="parallel-btn" onclick="editSubject('${s.id}')" title="Editar paralelo ${String(s.course||'')}">${String(s.course||'N/A')}</button>
-              `).join('')}
-          </div>
+        </div>
+
+        <div class="parallel-heading">PARALELOS DISPONIBLES:</div>
+        <div class="parallel-list">
+          ${list.sort((a,b) => String(a.course||'').localeCompare(String(b.course||''), undefined, {numeric:true})).map(s => `
+            <button type="button" class="parallel-btn ${gAdvancedPriority && s.isExtraPriority ? 'parallel-extra-priority' : ''}" onclick="editSubject('${String(s.id)}')" title="Editar paralelo ${String(s.course||'')}">${String(s.course||'N/A')}</button>
+          `).join('')}
+        </div>
       </div>`;
   });
-  
+
   container.innerHTML = html;
 }
 
@@ -467,7 +619,7 @@ function deleteEntireSubject(targetName) {
     const idsToRemove = subjects.filter(s => String(s.name || '').trim() === targetName).map(s => String(s.id));
     subjects = subjects.filter(s => String(s.name || '').trim() !== targetName);
     idsToRemove.forEach(id => selected.delete(id));
-    saveData(); renderManage(); renderSidebar(); renderGrid(); updateQuickParaleloSelect();
+    saveData(); renderManage(); renderSidebar(); renderGrid(); renderAdvancedPriorityManager(); updateQuickParaleloSelect();
     if(document.getElementById('viewAuto').style.display === 'flex') renderAutoSelection();
     showToast(`🗑️ ${targetName} eliminada`);
   }
@@ -480,7 +632,7 @@ function renderAutoSelection() {
     container.innerHTML = '<p style="color:var(--muted); font-size:0.85rem; grid-column:1/-1;" class="animate-fade">Agrega materias primero para generar horarios.</p>'; return;
   }
   container.innerHTML = uniqueNames.map((name, index) => {
-    const isMandatory = subjects.some(s => String(s.name || '').trim() === name && s.isMandatory);
+    const isMandatory = isSubjectMandatory(name);
     const pinHtml = isMandatory ? '<span style="color:var(--danger);" title="Obligatoria (Fija en el horario)">📌</span>' : '';
     const isChecked = !unselectedAutoFilters.has(name);
     return `
@@ -594,6 +746,14 @@ function calculateGaps(combo) {
 }
 
 function generateAutoSchedules() {
+  if(gAdvancedPriority) {
+    openPriorityGenerationMenu();
+    return;
+  }
+  runAutoGeneration('normal');
+}
+
+function runAutoGeneration(generationMode) {
   const resultsDiv = document.getElementById('autoResults');
   resultsDiv.innerHTML = '<p style="color:var(--accent);">Calculando combinaciones óptimas...</p>';
   
@@ -641,6 +801,17 @@ function generateAutoSchedules() {
     
     allValid.sort((a, b) => {
       if(b.length !== a.length) return b.length - a.length;
+
+      if(generationMode === 'advanced') {
+        const extraA = a.filter(s => s.isExtraPriority === true).length;
+        const extraB = b.filter(s => s.isExtraPriority === true).length;
+        if(extraB !== extraA) return extraB - extraA;
+      }
+
+      const mandatoryA = a.filter(s => s.isMandatory === true).length;
+      const mandatoryB = b.filter(s => s.isMandatory === true).length;
+      if(mandatoryB !== mandatoryA) return mandatoryB - mandatoryA;
+
       const gapsA = calculateGaps(a); const gapsB = calculateGaps(b);
       if (gapsA !== gapsB) return gapsA - gapsB;
       const hA = a.reduce((acc, s) => acc + (s.slots||[]).reduce((sum,sl) => sum + (Number(sl.end) - Number(sl.start)), 0), 0);
@@ -650,7 +821,7 @@ function generateAutoSchedules() {
 
     generatedCombinations = allValid;
     if (iterations > MAX_ITERATIONS) { alert("⚠️ El cálculo se detuvo por seguridad para no colgar el navegador. Mostrando los mejores resultados hallados."); }
-    renderAutoResults();
+    renderAutoResults(generationMode);
   }, 100);
 }
 
@@ -662,7 +833,7 @@ function applyAutoCombo(idsArray, indexOption) {
   showToast(`✅ Opción #${indexOption} aplicada correctamente`); switchView('schedule');
 }
 
-function renderAutoResults() {
+function renderAutoResults(generationMode = 'normal') {
   const resultsDiv = document.getElementById('autoResults');
   document.getElementById('btnFullScript').style.display = generatedCombinations.length ? 'block' : 'none';
   document.getElementById('btnFullCatalog').style.display = generatedCombinations.length ? 'block' : 'none';
@@ -670,7 +841,10 @@ function renderAutoResults() {
   if(generatedCombinations.length === 0) { resultsDiv.innerHTML = '<p style="color:var(--danger);" class="animate-fade">No se encontraron combinaciones viables.</p>'; return; }
 
   const limit = Math.min(generatedCombinations.length, 50);
-  let html = `<p style="color:var(--accent2); font-size:0.85rem; font-weight:600; margin-bottom:8px;" class="animate-fade">✅ Se generaron ${generatedCombinations.length} horarios compatibles.</p>`;
+  const intro = generationMode === 'advanced'
+    ? `✅ [PRIORIDAD AVANZADA] - Se generaron ${generatedCombinations.length} horarios compatibles.`
+    : `✅ Se generaron ${generatedCombinations.length} horarios compatibles.`;
+  let html = `<p style="color:var(--accent2); font-size:0.85rem; font-weight:600; margin-bottom:8px;" class="animate-fade">${intro}</p>`;
   
   for(let i = 0; i < limit; i++) {
     const combo = generatedCombinations[i];
@@ -680,11 +854,12 @@ function renderAutoResults() {
     
     let subjectsHtml = combo.map(s => {
        const pinHtml = s.isMandatory ? '<span style="color:var(--danger); font-size:0.7rem; margin-right:4px;" title="Obligatoria">📌</span>' : '';
-       return `<div class="auto-subject"><span class="auto-subject-name">${pinHtml}${String(s.name||'')}</span><span class="auto-subject-course">Paralelo: ${String(s.course||'')}</span></div>`;
+       const extraClass = generationMode === 'advanced' && s.isExtraPriority ? ' auto-extra-course' : '';
+       return `<div class="auto-subject"><span class="auto-subject-name">${pinHtml}${String(s.name||'')}</span><span class="auto-subject-course${extraClass}">Paralelo: ${String(s.course||'')}</span></div>`;
     }).join('');
     
     html += `
-      <div class="auto-card animate-fade" style="animation-delay: ${i * 0.05}s">
+      <div class="auto-card animate-fade" style="animation-delay: ${(i % 50) * 0.03}s">
         <div class="auto-card-header">
           <div class="auto-card-title">Opción #${i+1}</div>
           <div class="auto-card-stats">${combo.length} Materias • ${totalHours} hrs clase • ${gaps} hrs huecas</div>
@@ -775,19 +950,40 @@ function downloadHTMLCatalog() {
 }
 
 document.addEventListener('keydown', e => {
-    if(e.key === 'Escape' && document.getElementById('overlay').classList.contains('show')) closeModal();
+    if(e.key !== 'Escape') return;
+    if(document.getElementById('generationChoiceOverlay')?.classList.contains('show')) { closePriorityGenerationMenu(); return; }
+    if(document.getElementById('overlay').classList.contains('show')) { closeModal(); return; }
+    if(document.getElementById('settingsOverlay').classList.contains('show')) closeSettings();
 });
 
+function syncMandatoryFieldVisibility() {
+  const group = document.getElementById('mandatoryFieldGroup');
+  const checkbox = document.getElementById('fMandatory');
+  const input = document.getElementById('fName');
+  if(!group || !checkbox || !input) return;
+
+  const name = String(input.value || '').trim();
+  const exists = subjects.some(s => normalizeSubjectName(s.name) === normalizeSubjectName(name));
+  const shouldShow = !editingId && !exists;
+  group.style.display = shouldShow ? 'flex' : 'none';
+}
+
 document.getElementById('fName').addEventListener('input', function(e) {
-  const inputName = String(e.target.value || '').trim().toLowerCase();
-  const existingSubject = subjects.find(s => String(s.name || '').trim().toLowerCase() === inputName);
-  if (existingSubject) { 
-      document.getElementById('fLevel').value = String(existingSubject.level || '').replace(/\D/g, ''); 
+  const inputName = String(e.target.value || '').trim();
+  const existingSubject = subjects.find(s => normalizeSubjectName(s.name) === normalizeSubjectName(inputName));
+  if (existingSubject) {
+      document.getElementById('fLevel').value = String(existingSubject.level || '').replace(/\D/g, '');
       chosenColor = existingSubject.color || COLORS[0];
+      document.getElementById('fMandatory').checked = existingSubject.isMandatory === true;
       renderColorRow();
       if(gMode === 'grid') buildInputGrid();
+  } else if (!editingId) {
+      document.getElementById('fMandatory').checked = false;
   }
+  syncMandatoryFieldVisibility();
 });
+
+document.getElementById('fName').addEventListener('change', syncMandatoryFieldVisibility);
 
 function editSubject(id) { openModal(String(id)); }
 
@@ -805,7 +1001,9 @@ function openModal(id) {
     document.getElementById('fLevel').value = String(s.level || '').replace(/\D/g, '');
     document.getElementById('fCourse').value = String(s.course || '').replace('P-', '').replace('(Copia)', '').trim();
     document.getElementById('fNote').value = String(s.note || '');
-    document.getElementById('fMandatory').checked = s.isMandatory === true;
+    document.getElementById('fMandatory').checked = isSubjectMandatory(s.name);
+    const extraToggle = document.getElementById('fExtraPriority');
+    if(extraToggle) extraToggle.checked = s.isExtraPriority === true;
     chosenColor = s.color || COLORS[0]; 
     slots = (s.slots || []).map(sl => ({...sl}));
     document.getElementById('btnModalDelete').style.display = 'block'; 
@@ -814,10 +1012,20 @@ function openModal(id) {
     document.getElementById('fName').value = ''; document.getElementById('fLevel').value = ''; 
     document.getElementById('fCourse').value = ''; document.getElementById('fNote').value = '';
     document.getElementById('fMandatory').checked = false;
+    const extraToggle = document.getElementById('fExtraPriority');
+    if(extraToggle) extraToggle.checked = false;
     slots = [{day:'LUNES', start:7, end:8}];
     document.getElementById('btnModalDelete').style.display = 'none'; 
   }
-  renderColorRow(); 
+  renderColorRow();
+  syncMandatoryFieldVisibility();
+
+  const advancedSetting = document.getElementById('advancedParallelSetting');
+  if(advancedSetting) advancedSetting.style.display = gAdvancedPriority ? 'flex' : 'none';
+  if(!gAdvancedPriority) {
+    const extraToggle = document.getElementById('fExtraPriority');
+    if(extraToggle) extraToggle.checked = false;
+  }
   
   document.getElementById('lblModeIndicator').textContent = gMode === 'grid' ? '(Modo Cuadrícula)' : '(Modo Lista)';
   document.getElementById('containerGridMode').style.display = gMode === 'grid' ? 'block' : 'none';
@@ -831,15 +1039,20 @@ function openModal(id) {
 
   document.getElementById('overlay').classList.add('show');
 }
+
 function closeModal() { document.getElementById('overlay').classList.remove('show'); editingId = null; }
 
-function renderColorRow() { const row = document.getElementById('colorRow'); row.innerHTML = COLORS.map(c => `<div class="color-dot ${c===chosenColor?'selected':''}" style="background:${c}" onclick="selectColor('${c}')"></div>`).join(''); }
+function renderColorRow() {
+  const row = document.getElementById('colorRow');
+  row.innerHTML = COLORS.map(c => `<div class="color-dot ${c===chosenColor?'selected':''}" style="background:${c}" onclick="selectColor('${c}')"></div>`).join('');
+}
+
 function selectColor(c) { chosenColor = c; renderColorRow(); if(gMode === 'grid') buildInputGrid(); }
 
 function buildInputGrid() {
   const activeDays = getActiveDays();
   let html = '<tr><th>Hora</th>' + activeDays.map(d => `<th>${d.substring(0,3)}</th>`).join('') + '</tr>';
-  for(let h = 7; h <= 19; h++) { 
+  for(let h = 7; h <= 19; h++) {
     html += `<tr><td class="time-lbl">${h}:00 - ${h+1}:00</td>`;
     activeDays.forEach(d => {
       const cellId = `${d}-${h}`; const isActive = activeGridCells.has(cellId);
@@ -849,6 +1062,7 @@ function buildInputGrid() {
   }
   document.getElementById('inputGridTable').innerHTML = html;
 }
+
 function toggleGridCell(cellId) { activeGridCells.has(cellId) ? activeGridCells.delete(cellId) : activeGridCells.add(cellId); buildInputGrid(); }
 
 function renderSlots(slotsToRender) {
@@ -856,6 +1070,7 @@ function renderSlots(slotsToRender) {
   const list = document.getElementById('slotList');
   list.innerHTML = (slotsToRender||[]).map(sl => `<div class="slot-row"><select class="s-day">${activeDays.map(d=>`<option ${sl.day===d?'selected':''}>${d}</option>`).join('')}</select><input type="number" min="7" max="19" class="s-start" value="${sl.start}" placeholder="Inicio"><input type="number" min="8" max="20" class="s-end" value="${sl.end}" placeholder="Fin"><button class="rm-btn" onclick="this.closest('.slot-row').remove()">✕</button></div>`).join('');
 }
+
 function addSlot() {
   const activeDays = getActiveDays();
   const list = document.getElementById('slotList');
@@ -877,9 +1092,9 @@ function saveSubject() {
   const levelInput = String(document.getElementById('fLevel').value || '').trim() || '1';
   const formattedLevel = 'Semestre ' + levelInput;
   
-  const isDuplicate = subjects.some(s => String(s.id) !== String(editingId) && String(s.name || '').trim().toLowerCase() === name.toLowerCase() && String(s.course || '') === formattedCourse);
+  const isDuplicate = subjects.some(s => String(s.id) !== String(editingId) && normalizeSubjectName(s.name) === normalizeSubjectName(name) && String(s.course || '') === formattedCourse);
   if(isDuplicate) {
-      alert(`⚠️ Ya existe "${name}" en el paralelo ${formattedCourse}.\nSi deseas cambiar sus horas, edita el paralelo existente.`);
+      alert(`⚠️ Ya existe "${name}" en el paralelo ${formattedCourse}.\\nSi deseas cambiar sus horas, edita el paralelo existente.`);
       return;
   }
 
@@ -889,7 +1104,7 @@ function saveSubject() {
       let hoursActive = []; for(let h=7; h<=19; h++) { if(activeGridCells.has(`${day}-${h}`)) hoursActive.push(h); }
       if(hoursActive.length === 0) return;
       hoursActive.sort((a,b)=>a-b); let start = hoursActive[0], prev = hoursActive[0];
-      for(let i=1; i<hoursActive.length; i++) { if(hoursActive[i] === prev + 1) prev = hoursActive[i]; else { currentSlots.push({day: day, start: start, end: prev + 1}); start = hoursActive[i]; prev = hoursActive[i]; } }
+      for(let i=1;i<hoursActive.length;i++) { if(hoursActive[i] === prev + 1) prev = hoursActive[i]; else { currentSlots.push({day: day, start: start, end: prev + 1}); start = hoursActive[i]; prev = hoursActive[i]; } }
       currentSlots.push({day: day, start: start, end: prev + 1});
     });
   } else {
@@ -912,12 +1127,23 @@ function saveSubject() {
   if(currentSlots.length === 0) { alert('Agrega al menos un bloque horario válido'); return; }
 
   const noteVal = String(document.getElementById('fNote').value || '').trim();
-  const isMandatory = document.getElementById('fMandatory').checked;
+  const editingSubject = editingId ? subjects.find(x => String(x.id) === String(editingId)) : null;
+  const nameAlreadyExists = subjects.some(s => String(s.id) !== String(editingId) && normalizeSubjectName(s.name) === normalizeSubjectName(name));
+  const groupMandatory = nameAlreadyExists ? isSubjectMandatory(name) : false;
+  const requestedMandatory = !nameAlreadyExists && !editingId ? document.getElementById('fMandatory').checked : groupMandatory;
+  const extraToggle = document.getElementById('fExtraPriority');
+  const sameOriginalName = editingSubject && normalizeSubjectName(editingSubject.name) === normalizeSubjectName(name);
+  const isExtraPriority = gAdvancedPriority
+    ? (extraToggle ? extraToggle.checked : false)
+    : (sameOriginalName ? editingSubject.isExtraPriority === true : false);
+  const finalMandatory = isExtraPriority ? true : requestedMandatory;
 
   const s = {
     id: editingId || getNextId(), name,
     level: formattedLevel,
-    course: formattedCourse, color: chosenColor, slots: currentSlots, note: noteVal, isMandatory: isMandatory
+    course: formattedCourse, color: chosenColor, slots: currentSlots, note: noteVal,
+    isMandatory: finalMandatory,
+    isExtraPriority: isExtraPriority
   };
 
   if(editingId) { 
@@ -926,8 +1152,15 @@ function saveSubject() {
   } else { 
       subjects.push(s); 
   }
+
+  if(finalMandatory || isExtraPriority) {
+    subjects.forEach(item => {
+      if(normalizeSubjectName(item.name) === normalizeSubjectName(name)) item.isMandatory = true;
+    });
+  }
+  normalizePriorityState();
   
-  saveData(); closeModal(); renderSidebar(); renderGrid(); renderManage(); renderAutoSelection(); updateDatalist(); updateQuickParaleloSelect();
+  saveData(); closeModal(); renderSidebar(); renderGrid(); renderManage(); renderAutoSelection(); renderAdvancedPriorityManager(); updateDatalist(); updateQuickParaleloSelect();
   showToast("✅ Materia guardada con éxito");
 }
 
@@ -937,7 +1170,7 @@ function deleteSubjectFromModal() {
   subjects = subjects.filter(s => String(s.id) !== String(editingId)); 
   selected.delete(String(editingId)); 
   selected.delete(Number(editingId)); 
-  saveData(); closeModal(); renderSidebar(); renderGrid(); renderManage(); renderAutoSelection(); updateDatalist(); updateQuickParaleloSelect();
+  saveData(); closeModal(); renderSidebar(); renderGrid(); renderManage(); renderAutoSelection(); renderAdvancedPriorityManager(); updateDatalist(); updateQuickParaleloSelect();
   showToast("🗑️ Paralelo eliminado");
 }
 
@@ -971,8 +1204,9 @@ window.addEventListener('resize', () => {
 });
 
 document.getElementById('overlay').addEventListener('click', e => { if(e.target === document.getElementById('overlay')) closeModal(); });
+document.getElementById('generationChoiceOverlay')?.addEventListener('click', e => { if(e.target === document.getElementById('generationChoiceOverlay')) closePriorityGenerationMenu(); });
 
-loadData(); renderSidebar(); renderGrid(); updateDatalist(); updateQuickParaleloSelect();
+loadData(); renderSidebar(); renderGrid(); renderAutoSelection(); renderManage(); renderAdvancedPriorityManager(); updateDatalist(); updateQuickParaleloSelect();
 
 if(window.innerWidth <= 768 && document.getElementById('viewManage').style.display !== 'flex') document.getElementById('mobileMenuBtn').style.display = 'block';
 
